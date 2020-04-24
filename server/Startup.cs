@@ -61,14 +61,16 @@ namespace server
                 app.UseDeveloperExceptionPage();
                 app.UseCors();
             }
+            else
+            {
+                app.UseCors(prodCORS);
+            }
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseAuthorization();
-
-            app.UseCors(prodCORS);
             app.UseSpaStaticFiles();
             app.UseSpa(config => config.Options.SourcePath = "wwwroot");
             app.UseDefaultFiles();
