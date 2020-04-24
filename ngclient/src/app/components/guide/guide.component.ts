@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef  } from '@angular/core';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-guide',
@@ -10,7 +11,7 @@ import * as SimplePeer from 'simple-peer';
 export class GuideComponent implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', {static: false}) pano: ElementRef;
 
-  serverUrl = 'https://localhost:5001/';
+  serverUrl = environment.serverUrl;
 
   streetView: google.maps.StreetViewPanorama;
 

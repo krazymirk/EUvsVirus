@@ -3,6 +3,7 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-viewer',
@@ -12,7 +13,7 @@ import { take } from 'rxjs/operators';
 export class ViewerComponent implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', {static: false}) pano: ElementRef;
 
-  serverUrl = 'https://localhost:5001/';
+  serverUrl = environment.serverUrl;
 
   streetView: google.maps.StreetViewPanorama;
   id: string;

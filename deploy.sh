@@ -8,7 +8,9 @@ cd ..;
 
 npm run release --prefix ./ngclient
 
-mv ./output ./server/wwwroot
+rm -r ./server/wwwroot/
+
+mv ./output/ ./server/wwwroot
 
 dotnet restore
 

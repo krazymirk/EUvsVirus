@@ -56,31 +56,35 @@ namespace server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+            app.UseAuthorization();
+            if (env.IsDevelopment()) {
                 app.UseCors();
             }
             else
             {
                 app.UseCors(prodCORS);
-                app.UseSpaStaticFiles();
-                app.UseSpa(config => config.Options.SourcePath = "wwwroot");
             }
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ConnectionHub>("/connect");
             });
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseSpaStaticFiles();
+                app.UseSpa(config => config.Options.SourcePath = "wwwroot");
+                app.UseDefaultFiles();
+            }
+
+
         }
 
         private void InitData(Storage storage)
