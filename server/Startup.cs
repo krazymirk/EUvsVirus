@@ -64,6 +64,8 @@ namespace server
             else
             {
                 app.UseCors(prodCORS);
+                app.UseSpaStaticFiles();
+                app.UseSpa(config => config.Options.SourcePath = "wwwroot");
             }
 
             app.UseHttpsRedirection();
@@ -71,8 +73,6 @@ namespace server
             app.UseRouting();
 
             app.UseAuthorization();
-            app.UseSpaStaticFiles();
-            app.UseSpa(config => config.Options.SourcePath = "wwwroot");
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
