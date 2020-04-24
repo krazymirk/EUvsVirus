@@ -1,0 +1,17 @@
+<div id="floating-panel">
+    <input id="start-video-btn" type="button" value="Start video" (click)="toggleVideo()" />
+    <h1>You:</h1>
+    <video></video>
+
+    <p>
+        Link for viewers: <a target="_blank" [routerLink]="['/viewer', guideId]"></a>
+    </p>
+</div>
+
+<div id="pano-info">
+    <p id="pano-id"></p>
+    <p id="position"></p>
+    <p id="heading"></p>
+    <p id="pitch"></p>
+</div>
+<div #mapContainer id="pano"></div>
