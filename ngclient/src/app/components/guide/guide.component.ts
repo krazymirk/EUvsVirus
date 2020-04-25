@@ -3,6 +3,7 @@ import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { environment } from 'src/environments/environment';
 import {  PositionInfo } from 'src/app/models/PanoInfo';
+import { DataFormat, DataType } from 'src/app/models/DataFormat';
 
 interface PeerInfo {
   id: number;
@@ -117,10 +118,8 @@ export class GuideComponent implements OnInit, AfterViewInit {
     this.streetView.addListener('position_changed', () => {
       const positionCell = document.getElementById('position');
       positionCell.innerHTML = 'POS: ' + this.streetView.getPosition() + '';
-      this.panoInfo.lng = this.streetView.getPosition().lng();
-      this.panoInfo.lat = this.streetView.getPosition().lat();
 
-      this.send(this.panoInfo);
+      this.sendPosition();
     });
 
     this.streetView.addListener('pov_changed', () => {
@@ -129,6 +128,31 @@ export class GuideComponent implements OnInit, AfterViewInit {
       headingCell.innerHTML = 'HEAD: ' + this.streetView.getPov().heading + '';
       pitchCell.innerHTML = 'PITCH: ' + this.streetView.getPov().pitch + '';
     });
+  }
+
+  sendPosition() {
+    const position: DataFormat = {
+      dataType: DataType.POSITION,
+      body: {
+        lat: this.streetView.getPosition().lat(),
+        lng: this.streetView.getPosition().lng()
+      }
+    };
+
+    this.send(position);
+  }
+
+  sendHeading() {
+    const heading: DataFormat = {
+      dataType: DataType.HEADING,
+      body: {
+        heading: this.streetView.getPov().heading,
+        pitch: this.streetView.getPov().pitch,
+        zoom: this.streetView.getZoom()
+      }
+    };
+
+    this.send(heading);
   }
 
   toggleVideo() {

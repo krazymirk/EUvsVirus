@@ -14,8 +14,13 @@ video {
     z-index: 5;
     text-align: center;
     font-family: 'Roboto','sans-serif';
+    border-radius: 10px;
     line-height: 30px;
     background-color: #fff;
+}
+
+.icons {
+    float: right;
 }
 
 #pano-info {

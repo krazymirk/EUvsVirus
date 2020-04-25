@@ -4,6 +4,7 @@ import * as SimplePeer from 'simple-peer';
 import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { DataFormat, DataType } from 'src/app/models/DataFormat';
 
 @Component({
   selector: 'app-viewer',
@@ -26,6 +27,9 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   hub: HubConnection;
 
   stream: MediaStream;
+
+  currentPosition: google.maps.LatLng;
+  currentHeading: google.maps.StreetViewPov;
 
   constructor(private route: ActivatedRoute) {
   }
@@ -95,14 +99,33 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     });
 
     this.guidePeer.on('data', data => {
-      const decoder = new TextDecoder('utf-8');
-
-      const positionString = decoder.decode(data);
-      const position = JSON.parse(positionString);
-      const posObj = new google.maps.LatLng(position.lat, position.lng);
-      console.log(data, positionString, position, posObj);
-      this.streetView.setPosition(posObj);
+      const parsed = this.parseData(data);
+      if (parsed.dataType === DataType.HEADING) {
+        this.updateHeading(parsed.body);
+      } else if (parsed.dataType === DataType.POSITION) {
+        this.updatePosition(parsed.body);
+      }
     });
+  }
+
+  private updatePosition(positionData) {
+    const position = new google.maps.LatLng(positionData.lat, positionData.lng);
+    this.streetView.setPosition(position);
+  }
+
+  private updateHeading(povData) {
+    this.streetView.setOptions({
+      pov: {
+        heading: povData.heading,
+        pitch: povData.pitch,
+      },
+      zoom: povData.zoom
+    });
+  }
+
+  private parseData(data): DataFormat {
+    const dataString = this.decoder.decode(data);
+    return JSON.parse(dataString);
   }
 
   addStreamToDom(stream: MediaStream, dom: HTMLVideoElement) {
