@@ -54,7 +54,16 @@ export class GuideComponent implements OnInit, AfterViewInit {
         viewers = viewers.filter(v => v.connected);
       }
     }
-    viewers.forEach(v => v.peer.send(str));
+
+    for (const v of viewers) {
+      try {
+        v.peer.send(str);
+      } catch (e) {
+        console.error('Error on trying to send to viewer', e, v);
+        const index = this.viewers.indexOf(v);
+        this.viewers.splice(index, 1);
+      }
+    }
   }
 
   private hubStart() {
@@ -78,6 +87,13 @@ export class GuideComponent implements OnInit, AfterViewInit {
             viewer.peer.addStream(this.stream);
           }
         });
+
+        viewer.peer.on('close', () => {
+          const index = this.viewers.indexOf(viewer);
+          this.viewers.splice(index, 1);
+        });
+
+        viewer.peer.on('error', console.error);
       }
       viewer.peer.signal(JSON.parse(signal));
     });
