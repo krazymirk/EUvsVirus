@@ -99,7 +99,7 @@ export class LandingPageComponent implements AfterViewInit {
     };
 
     if (this.tourName !== '') {
-      this.http.post(this.serverUrl + 'tour', this.tourName).toPromise().then((tour: Tour) => {
+      this.http.post(this.serverUrl + 'api/tour', tourToCreate).toPromise().then((tour: Tour) => {
         if (tour) {
           this.navigateToTour(tour.tourHash);
         }

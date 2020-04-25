@@ -24,7 +24,7 @@ interface PeerInfo {
   templateUrl: './guide.component.html',
   styleUrls: ['./guide.component.scss']
 })
-export class GuideComponent implements OnInit, AfterViewInit {
+export class GuideComponent implements OnInit {
   @ViewChild('mapContainer', {static: false}) pano: ElementRef;
   @ViewChild('video', {static: false}) videoDom: ElementRef;
 
@@ -58,6 +58,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
     this.http.get(environment.serverUrl + `api/tour/${this.tourHash}`).toPromise().then((tour: Tour) => {
       if (tour) {
         this.tour = tour;
+        this.initializeMap();
         this.setStartingPosition();
         this.hub.start().then(this.hubStart.bind(this));
       }
@@ -176,7 +177,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {
+  initializeMap(): void {
     const coordinates = new google.maps.LatLng(42.646859, 23.396585);
     const mapOptions = {
       position: coordinates,     // {lat: 42.646859, lng: 23.396585} - Capital Fort
