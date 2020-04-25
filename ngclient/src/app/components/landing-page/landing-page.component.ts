@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
+import { Tour } from 'src/app/models/Tour';
 
 @Component({
   selector: 'app-landing-page',
@@ -11,13 +12,15 @@ import { Router } from '@angular/router';
 export class LandingPageComponent implements AfterViewInit {
 
   serverUrl = environment.serverUrl;
+  map: google.maps.Map;
   tourName = '';
   tourDate: Date = new Date();
+  markedLocation: google.maps.LatLng;
 
   constructor(private http: HttpClient, private router: Router) { }
 
   ngAfterViewInit(): void {
-    const map = new google.maps.Map(document.getElementById('map'), {
+    this.map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: -33.8688, lng: 151.2195},
       zoom: 13,
       mapTypeId: 'roadmap'
@@ -26,11 +29,11 @@ export class LandingPageComponent implements AfterViewInit {
     // Create the search box and link it to the UI element.
     const input = document.getElementById('pac-input') as any;
     const searchBox = new google.maps.places.SearchBox(input);
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+    this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
     // Bias the SearchBox results towards current map's viewport.
-    map.addListener('bounds_changed', () => {
-      searchBox.setBounds(map.getBounds());
+    this.map.addListener('bounds_changed', () => {
+      searchBox.setBounds(this.map.getBounds());
     });
 
     let markers = [];
@@ -66,11 +69,13 @@ export class LandingPageComponent implements AfterViewInit {
 
         // Create a marker for each place.
         markers.push(new google.maps.Marker({
-          map,
+          map: this.map,
           icon,
           title: place.name,
           position: place.geometry.location
         }));
+
+        this.markedLocation = place.geometry.location;
 
         if (place.geometry.viewport) {
           // Only geocodes have viewport.
@@ -79,13 +84,22 @@ export class LandingPageComponent implements AfterViewInit {
           bounds.extend(place.geometry.location);
         }
       });
-      map.fitBounds(bounds);
+      this.map.fitBounds(bounds);
     });
   }
 
   createTour() {
+    const tourToCreate: Tour = {
+      startPosition: {
+        lat: this.markedLocation.lat(),
+        lng: this.markedLocation.lng()
+      },
+      name: this.tourName,
+      startDateTime: this.tourDate,
+    };
+
     if (this.tourName !== '') {
-      this.http.post(this.serverUrl + 'tour', this.tourName).toPromise().then((id) => {
+      this.http.post(this.serverUrl + 'tour', tourToCreate).toPromise().then((id) => {
         if (id && id !== '') {
           this.navigateToTour(id);
         }
