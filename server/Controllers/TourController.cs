@@ -11,12 +11,10 @@ namespace server.Controllers
     [ApiController]
     public class TourController : ControllerBase
     {
-        private readonly Storage Storage;
         private ICacheService _cacheService;
 
-        public TourController(Storage storage, ICacheService cacheService)
+        public TourController(ICacheService cacheService)
         {
-            Storage = storage;
             _cacheService = cacheService;
         }
 
@@ -36,6 +34,20 @@ namespace server.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Tour incoming)
+        {
+            incoming.Id = Guid.NewGuid();
+
+            var hash = incoming.Id.Hash();
+            incoming.TourHash = hash;
+            await _cacheService.SetCacheValueAsync(hash, incoming.Id.ToString());
+            await _cacheService.SetCacheValueAsync("tour_" + incoming.Id.ToString(), JsonConvert.SerializeObject(incoming));
+
+            return Ok(incoming);
+        }
+
+        [HttpPost]
+        [Route("get")]
+        public async Task<IActionResult> CreateViewerLinks([FromBody] Tour incoming)
         {
             incoming.Id = Guid.NewGuid();
 

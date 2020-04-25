@@ -54,9 +54,6 @@ namespace server
                     });
             });
 
-            var storage = new Storage();
-            InitData(storage);
-            services.AddSingleton(storage);
             services.AddSingleton<IConnectionMultiplexer>(x => ConnectionMultiplexer.Connect(Configuration["RedisConnection"]));
             services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddHostedService<RedisSubscriber>();
@@ -108,12 +105,6 @@ namespace server
             }
 
 
-        }
-
-        private void InitData(Storage storage)
-        {
-            storage.Hashes.AddOrUpdate(storage.DefaultId.Hash(), storage.DefaultId);
-            storage.Tours.AddOrUpdate(storage.DefaultId, new Tour { Id = storage.DefaultId, Name = "Best tour ever" });
         }
     }
 }
