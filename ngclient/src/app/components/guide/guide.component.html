@@ -15,8 +15,8 @@
         />
     </div>
 </div>
-<div id="video-container" [hidden]="!isBroadcasting">
-    <video></video>
+<div id="video-container" [hidden]="!this.abilities.video">
+    <video #video></video>
 </div>
 
 <div id="pano-info">
