@@ -164,6 +164,14 @@ export class GuideComponent implements OnInit, AfterViewInit {
     }
   }
 
+  toggleAudio() {
+    // mute me
+  }
+
+  toggleParticipants() {
+    // show people connected
+  }
+
   getMedia() {
     // get video/voice stream
     navigator.mediaDevices.getUserMedia({
