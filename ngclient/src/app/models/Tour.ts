@@ -1,11 +1,11 @@
 import { StartingPosition } from './Position';
 
 export interface Tour {
-    idHash: string;
+    idHash?: string;
     name: string ;
     startPosition: StartingPosition;
     startDateTime: Date;
-    guideName: string;
-    guideLink: string;
-    guestHash: string;
+    guideName?: string;
+    guideLink?: string;
+    guestHash?: string;
 }
