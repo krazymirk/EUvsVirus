@@ -5,5 +5,6 @@ export interface DataFormat {
 
 export enum DataType {
     POSITION = 'POS', // lat + lng
-    HEADING = 'HEAD' // pitch + heading
+    HEADING = 'HEAD', // pitch + heading
+    ABILITIES = 'ABILITIES'
 }

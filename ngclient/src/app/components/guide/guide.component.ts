@@ -15,8 +15,11 @@ import { Tour } from 'src/app/models/Tour';
 interface PeerInfo {
   id: number;
   peer: SimplePeer.Instance;
-  abilities: Abilities;
+  currentAbilities: Abilities;
+  wantedAbilities: Abilities;
   connected?: boolean;
+  audioStream?: MediaStream;
+  videoStream?: MediaStream;
 }
 
 @Component({
@@ -46,6 +49,7 @@ export class GuideComponent implements OnInit {
     video: true,
     audio: false
   };
+  decoder: TextDecoder;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
@@ -74,10 +78,8 @@ export class GuideComponent implements OnInit {
       this.videoStream = v;
       this.changeVideoDomStream();
     });
-  }
 
-  private updateStream(stream: MediaStream) {
-    this.changeVideoDomStream();
+    this.decoder = new TextDecoder('utf-8');
   }
 
   private setStartingPosition() {
@@ -87,22 +89,65 @@ export class GuideComponent implements OnInit {
 
   toggleVideo() {
     this.abilities.video = !this.abilities.video;
+
+    this.updateAbilities();
   }
 
   toggleAudio() {
     this.abilities.audio = !this.abilities.audio;
+
+    this.updateAbilities();
   }
 
-  private updateAbilities() {
+  private updateAbilities(fromViewer?: boolean) {
+
+    if (!fromViewer) {
+      this.send({dataType: DataType.ABILITIES, body: this.abilities});
+    }
+
     const viewers = this.getConnectedViewers();
 
-    // viewers.forEach(v => v.peer.removeStream(this.stream));
+    for (const viewer of viewers) {
+      if (viewer.wantedAbilities.audio) {
+        if (viewer.currentAbilities.audio) {
+          if (!this.abilities.audio) {
+            viewer.peer.removeStream(viewer.audioStream);
+            destroyStream(viewer.audioStream);
+            viewer.currentAbilities.audio = false;
+            viewer.audioStream = undefined;
+          }
+        } else if (this.abilities.audio) {
+          viewer.audioStream = this.audioStream.clone();
+          viewer.peer.addStream(viewer.audioStream);
+          viewer.currentAbilities.audio = true;
+        }
+      } else if (viewer.currentAbilities.audio){
+        viewer.peer.removeStream(viewer.audioStream);
+        destroyStream(viewer.audioStream);
+        viewer.currentAbilities.audio = false;
+        viewer.audioStream = undefined;
+      }
 
-    // this.getNewMedia().then(stream => {
-    //   this.stream = stream;
-
-    //   viewers.forEach(v => v.peer.addStream(this.stream.));
-    // });
+      if (viewer.wantedAbilities.video) {
+        if (viewer.currentAbilities.video) {
+          if (!this.abilities.video) {
+            viewer.peer.removeStream(viewer.videoStream);
+            destroyStream(viewer.videoStream);
+            viewer.currentAbilities.video = false;
+            viewer.videoStream = undefined;
+          }
+        } else if (this.abilities.video) {
+          viewer.videoStream = this.videoStream.clone();
+          viewer.peer.addStream(viewer.videoStream);
+          viewer.currentAbilities.video = true;
+        }
+      } else if (viewer.currentAbilities.video){
+        viewer.peer.removeStream(viewer.videoStream);
+        destroyStream(viewer.videoStream);
+        viewer.currentAbilities.video = false;
+        viewer.videoStream = undefined;
+      }
+    }
   }
 
   private getConnectedViewers() {
@@ -142,7 +187,7 @@ export class GuideComponent implements OnInit {
       let viewer = this.viewers.find(v => v.id === viewerId);
       if (!viewer) {
         const peer = new SimplePeer({ initiator: false });
-        viewer =  {id: viewerId, peer, abilities: this.abilities};
+        viewer =  {id: viewerId, peer, currentAbilities: {}, wantedAbilities: this.abilities};
         this.viewers.push(viewer);
 
         viewer.peer.on('signal', signal => {
@@ -151,14 +196,10 @@ export class GuideComponent implements OnInit {
 
         viewer.peer.on('connect', () => {
           viewer.connected = true;
-          this.send(this.panoInfo as any, viewer);
-          if (this.audioStream) {
-            viewer.peer.addStream(this.audioStream);
-          }
-          if (this.videoStream) {
-            viewer.peer.addStream(this.videoStream);
-          }
+          this.updateAbilities();
         });
+
+        viewer.peer.on('data', data => this.onData(data, viewer));
 
         viewer.peer.on('close', () => {
           const index = this.viewers.indexOf(viewer);
@@ -175,6 +216,13 @@ export class GuideComponent implements OnInit {
       this.guideId = id;
       a.innerHTML = location.protocol + '//' + location.host + '/viewer/' + this.tour.tourHash;
     });
+  }
+
+  onData(data: any, viewer: PeerInfo): void {
+    const decoded = this.parseData(data);
+
+    viewer.wantedAbilities = decoded.body;
+    this.updateAbilities(true);
   }
 
   initializeMap(): void {
@@ -267,6 +315,12 @@ export class GuideComponent implements OnInit {
   changeVideoDomStream() {
     changeDomStream(this.videoStream, this.videoDom.nativeElement);
   }
+
+  private parseData(data): DataFormat {
+    const dataString = this.decoder.decode(data);
+    return JSON.parse(dataString);
+  }
+
 
   get countConnected() {
     return this.viewers.filter(v => v.connected).length;

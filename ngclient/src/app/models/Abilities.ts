@@ -1,4 +1,4 @@
 export interface Abilities {
-    video: boolean;
-    audio: boolean;
+    video?: boolean;
+    audio?: boolean;
 }

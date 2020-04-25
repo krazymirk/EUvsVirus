@@ -2,10 +2,11 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } fr
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { ActivatedRoute } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { take, throwIfEmpty, ignoreElements } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { DataFormat, DataType } from 'src/app/models/DataFormat';
 import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
+import { Abilities } from 'src/app/models/Abilities';
 
 @Component({
   selector: 'app-viewer',
@@ -34,6 +35,12 @@ export class ViewerComponent implements OnInit, AfterViewInit {
 
   currentPosition: google.maps.LatLng;
   currentHeading: google.maps.StreetViewPov;
+
+  guideAbilities: Abilities;
+
+  wantedAbilities: Abilities = {audio: true, video: true};
+
+  abilities: Abilities;
 
   constructor(private route: ActivatedRoute) {
   }
@@ -76,16 +83,19 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   toggleVideo() {
-    this.isBroadcasting = !this.isBroadcasting;
-    if (this.isBroadcasting) {
-      const video = document.querySelector('video');
-      // TODO: recover streaming
-      this.changeVideoDomStream();
-    }
+    this.wantedAbilities.video = !this.wantedAbilities.video;
+    this.sendAbilitiesToGuide();
   }
 
   toggleAudio() {
-    // mute
+    this.wantedAbilities.audio = !this.wantedAbilities.audio;
+    this.sendAbilitiesToGuide();
+  }
+
+  private sendAbilitiesToGuide() {
+    this.updateAbilitiesProperty();
+    const data = {dataType: DataType.ABILITIES, body: this.wantedAbilities};
+    this.guidePeer.send(JSON.stringify(data));
   }
 
   private hubStart() {
@@ -105,8 +115,6 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     });
 
     this.guidePeer.on('stream', (stream: MediaStream) => {
-      this.destroyStreams();
-
       if (stream.getVideoTracks().length) {
         this.videoStream = stream;
         this.changeVideoDomStream();
@@ -122,6 +130,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
         this.updateHeading(parsed.body);
       } else if (parsed.dataType === DataType.POSITION) {
         this.updatePosition(parsed.body);
+      } else if (parsed.dataType === DataType.ABILITIES) {
+        this.updateAbilities(parsed.body);
       }
     });
 
@@ -156,6 +166,29 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       },
       zoom: povData.zoom
     });
+  }
+
+  private updateAbilities(abilities) {
+    this.guideAbilities = abilities;
+
+    this.updateAbilitiesProperty();
+  }
+
+  private updateAbilitiesProperty() {
+    this.abilities = {
+      audio: this.guideAbilities.audio && this.wantedAbilities.audio,
+      video: this.guideAbilities.video && this.wantedAbilities.video
+    };
+
+    if (!this.abilities.audio && this.audioStream) {
+      destroyStream(this.audioStream);
+      this.audioStream = undefined;
+    }
+
+    if (!this.abilities.video && this.videoStream) {
+      destroyStream(this.videoStream);
+      this.videoStream = undefined;
+    }
   }
 
   private parseData(data): DataFormat {
