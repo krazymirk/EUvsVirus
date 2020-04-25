@@ -7,6 +7,10 @@ import { DataFormat, DataType } from 'src/app/models/DataFormat';
 import { Abilities } from 'src/app/models/Abilities';
 import { Observable, Subscriber, Subscription } from 'rxjs';
 import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
+import { ActivatedRoute } from '@angular/router';
+import { take } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Tour } from 'src/app/models/Tour';
 
 interface PeerInfo {
   id: number;
@@ -25,6 +29,8 @@ export class GuideComponent implements OnInit, AfterViewInit {
   @ViewChild('video', {static: false}) videoDom: ElementRef;
 
   serverUrl = environment.serverUrl;
+  tourId: string;
+  tour: Tour;
 
   streetView: google.maps.StreetViewPanorama;
   guideId: string;
@@ -41,15 +47,26 @@ export class GuideComponent implements OnInit, AfterViewInit {
     audio: false
   };
 
-  constructor() { }
+  constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
   ngOnInit(): void {
+
+    this.route.params.pipe(take(1)).subscribe((params) => {
+      this.tourId = params.id;
+    });
+
+    this.http.get(environment.serverUrl + 'idHash').toPromise().then((tour: Tour) => {
+      if (tour) {
+        this.tour = tour;
+        this.setStartingPosition();
+        this.hub.start().then(this.hubStart.bind(this));
+      }
+    });
 
     this.hub = new HubConnectionBuilder()
       .withUrl(this.serverUrl + 'connect')
       .build();
 
-    this.hub.start().then(this.hubStart.bind(this));
 
     this.getAudioVideoStreams().then(([a, v]) => {
       this.audioStream = a;
@@ -60,6 +77,11 @@ export class GuideComponent implements OnInit, AfterViewInit {
 
   private updateStream(stream: MediaStream) {
     this.changeVideoDomStream();
+  }
+
+  private setStartingPosition() {
+    const position = new google.maps.LatLng(this.tour.startPosition.lat, this.tour.startPosition.lat);
+    this.streetView.setPosition(position);
   }
 
   toggleVideo() {
@@ -112,7 +134,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
   }
 
   private hubStart() {
-    this.hub.invoke('RegisterGuide');
+    this.hub.invoke('RegisterGuide', this.tour.idHash);
 
     this.hub.on('SignalToGuide', (viewerId, viewerSignal) => {
       let viewer = this.viewers.find(v => v.id === viewerId);

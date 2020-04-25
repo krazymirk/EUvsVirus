@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 
@@ -12,6 +12,7 @@ export class LandingPageComponent implements AfterViewInit {
 
   serverUrl = environment.serverUrl;
   tourName = '';
+  tourDate: Date = new Date();
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -86,10 +87,16 @@ export class LandingPageComponent implements AfterViewInit {
     if (this.tourName !== '') {
       this.http.post(this.serverUrl + 'tour', this.tourName).toPromise().then((id) => {
         if (id && id !== '') {
-          this.router.navigate(['/guide'], id);
+          this.navigateToTour(id);
         }
+      }).catch((err: HttpErrorResponse) => {
+        console.log('Creating tour failed.', err);
       });
     }
+  }
+
+  private navigateToTour(id: any) {
+    this.router.navigate([`/guide/${id}`]);
   }
 
 }
