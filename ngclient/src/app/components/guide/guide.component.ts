@@ -28,7 +28,8 @@ interface PeerInfo {
   styleUrls: ['./guide.component.scss']
 })
 export class GuideComponent implements OnInit {
-  @ViewChild('mapContainer', {static: false}) pano: ElementRef;
+  @ViewChild('streetViewContainer', {static: false}) panoRef: ElementRef;
+  @ViewChild('mapContainer', {static: false}) mapRef: ElementRef;
   @ViewChild('video', {static: false}) videoDom: ElementRef;
 
   serverUrl = environment.serverUrl;
@@ -36,8 +37,8 @@ export class GuideComponent implements OnInit {
   tour: Tour;
 
   streetView: google.maps.StreetViewPanorama;
+  map: google.maps.Map;
   guideId: string;
-  panoInfo: PositionInfo;
 
   viewers: PeerInfo[] = [];
   hub: HubConnection;
@@ -85,6 +86,7 @@ export class GuideComponent implements OnInit {
   private setStartingPosition() {
     const position = new google.maps.LatLng(this.tour.startPosition.lat, this.tour.startPosition.lng);
     this.streetView.setPosition(position);
+    this.map.setCenter(position);
   }
 
   toggleVideo() {
@@ -232,25 +234,30 @@ export class GuideComponent implements OnInit {
   }
 
   initializeMap(): void {
+
     const coordinates = new google.maps.LatLng(42.646859, 23.396585);
+
+    this.map = new google.maps.Map(this.mapRef.nativeElement, {
+      center: coordinates,
+      zoom: 14
+    });
+
     const mapOptions = {
-      position: coordinates,     // {lat: 42.646859, lng: 23.396585} - Capital Fort
+      position: coordinates,
       pov: {
         heading: 270,
         pitch: 0
       },
       visible: true,
-      streetViewControl: false,
-      source: google.maps.StreetViewSource.OUTDOOR
+      streetViewControl: true,
+      source: google.maps.StreetViewSource.DEFAULT,
+      draggable: true,
+      linksControl: true
     };
 
-    this.streetView = new google.maps.StreetViewPanorama(this.pano.nativeElement, mapOptions);
-    this.panoInfo = {
-      lat: coordinates.lat(),
-      lng: coordinates.lng(),
-      heading: mapOptions.pov.heading,
-      pitch: mapOptions.pov.pitch
-    };
+    this.streetView = new google.maps.StreetViewPanorama(this.panoRef.nativeElement, mapOptions);
+    this.map.setStreetView(this.streetView);
+
 
     this.streetView.addListener('position_changed', () => {
       this.sendPosition();
