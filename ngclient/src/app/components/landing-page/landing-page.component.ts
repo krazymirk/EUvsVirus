@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { Tour } from 'src/app/models/Tour';
+import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-landing-page',
@@ -11,14 +12,20 @@ import { Tour } from 'src/app/models/Tour';
 })
 export class LandingPageComponent implements AfterViewInit {
 
+  searchForm: FormGroup;
+  searchField: FormControl;
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';
   tourDate: Date = new Date();
   markedLocation: google.maps.LatLng;
 
-  constructor(private http: HttpClient, private router: Router) { }
-
+  constructor(private http: HttpClient, private router: Router,private formBuilder: FormBuilder) { }
+ ngOnInit():void{
+  this.searchForm = this.formBuilder.group({
+    search:[]
+  });
+ }
   ngAfterViewInit(): void {
     this.map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: -33.8688, lng: 151.2195},
@@ -98,15 +105,15 @@ export class LandingPageComponent implements AfterViewInit {
       startDateTime: this.tourDate,
     };
 
-    if (this.tourName !== '') {
-      this.http.post(this.serverUrl + 'api/tour', tourToCreate).toPromise().then((tour: Tour) => {
-        if (tour) {
-          this.navigateToTour(tour.tourHash);
-        }
-      }).catch((err: HttpErrorResponse) => {
-        console.log('Creating tour failed.', err);
-      });
-    }
+    // if (this.tourName !== '') {
+    //   this.http.post(this.serverUrl + 'api/tour', tourToCreate).toPromise().then((tour: Tour) => {
+    //     if (tour) {
+    //       this.navigateToTour(tour.tourHash);
+    //     }
+    //   }).catch((err: HttpErrorResponse) => {
+    //     console.log('Creating tour failed.', err);
+    //   });
+    // }
   }
 
   private navigateToTour(hash: any) {
