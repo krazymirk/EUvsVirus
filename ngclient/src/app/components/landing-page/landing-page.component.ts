@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
@@ -10,7 +10,7 @@ import { Tour } from 'src/app/models/Tour';
   styleUrls: ['./landing-page.component.scss']
 })
 export class LandingPageComponent implements AfterViewInit {
-
+  @ViewChild('mapTour', {static: false}) mapRef: ElementRef;
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';
@@ -20,7 +20,7 @@ export class LandingPageComponent implements AfterViewInit {
   constructor(private http: HttpClient, private router: Router) { }
 
   ngAfterViewInit(): void {
-    this.map = new google.maps.Map(document.getElementById('map'), {
+    this.map = new google.maps.Map(this.mapRef.nativeElement, {
       center: {lat: -33.8688, lng: 151.2195},
       zoom: 13,
       mapTypeId: 'roadmap'
