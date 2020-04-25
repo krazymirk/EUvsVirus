@@ -17,6 +17,11 @@ export class ViewerComponent implements OnInit, AfterViewInit {
 
   streetView: google.maps.StreetViewPanorama;
   id: string;
+  decoder: TextDecoder;
+
+  videoMuted = false;
+  stream: any;
+  viewer: any;
 
   constructor(private route: ActivatedRoute) {
   }
@@ -35,6 +40,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     };
 
     this.streetView = new google.maps.StreetViewPanorama(this.pano.nativeElement, mapOptions);
+
+    this.decoder = new TextDecoder('utf-8');
   }
 
   ngOnInit(): void {
@@ -47,22 +54,47 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     .build();
 
     hubConnection.start().then(() => {
-      const viewer = new SimplePeer( { initiator: true });
+      this.viewer = new SimplePeer( { initiator: true });
 
-      viewer.on('signal', signal => {
-        hubConnection.invoke('SendSignalToGuide', this.id, JSON.stringify(signal));
+      this.viewer.on('signal', signal => {
+        hubConnection.invoke('SendVideoStarted', true, JSON.stringify(signal));
       });
 
       hubConnection.on('SignalToViewer', signal => {
-        viewer.signal(JSON.parse(signal));
+        this.viewer.signal(JSON.parse(signal));
       });
 
-      viewer.on('stream', stream => {
+      this.viewer.on('stream', stream => {
         const video = document.querySelector('video');
-
+        this.stream = stream;
         this.addStreamToDom(stream, video);
       });
+
+      this.viewer.on('data', (data) => {
+        const decodedData = new TextDecoder('utf-8').decode(data);
+        const mapinfo = JSON.parse(decodedData);
+        console.log('========', mapinfo);
+
+        const position = new google.maps.LatLng(mapinfo.lat, mapinfo.lng);
+        this.streetView.setPosition(position);
+      });
     });
+  }
+
+  changePosition() {
+    // TODO: get position from guide from singnalR/webrtc
+    const coordinates = new google.maps.LatLng(48.860294, 2.338629); // the Louver
+    this.streetView.setPosition(coordinates);
+    this.streetView.setPov({heading: 270, pitch: 0});
+  }
+
+  showHideGuideVideo() {
+    this.videoMuted = !this.videoMuted;
+    if (!this.videoMuted) {
+      const video = document.querySelector('video');
+      // TODO: recover streaming
+      this.addStreamToDom(this.stream, video);
+    }
   }
 
   addStreamToDom(stream, dom) {

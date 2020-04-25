@@ -1,10 +1,9 @@
 <div id="floating-panel">
     <input id="start-video-btn" type="button" value="Start video" (click)="toggleVideo()" />
-    <h1>You:</h1>
     <video></video>
 
     <p>
-        Link for viewers: <a target="_blank" [routerLink]="['/viewer', guideId]"></a>
+        Link: <a target="_blank" [routerLink]="['/viewer', guideId]"></a>
     </p>
 </div>
 

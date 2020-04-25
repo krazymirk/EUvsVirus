@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef  } from '@angul
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { environment } from 'src/environments/environment';
+import {  PositionInfo } from 'src/app/models/PanoInfo';
 
 @Component({
   selector: 'app-guide',
@@ -14,9 +15,9 @@ export class GuideComponent implements OnInit, AfterViewInit {
   serverUrl = environment.serverUrl;
 
   streetView: google.maps.StreetViewPanorama;
-
   guideId: string;
-
+  guide: any;
+  panoInfo: PositionInfo;
 
   constructor() { }
 
@@ -37,6 +38,12 @@ export class GuideComponent implements OnInit, AfterViewInit {
     };
 
     this.streetView = new google.maps.StreetViewPanorama(this.pano.nativeElement, mapOptions);
+    this.panoInfo = {
+      lat: coordinates.lat(),
+      lng: coordinates.lng(),
+      heading: mapOptions.pov.heading,
+      pitch: mapOptions.pov.pitch
+    };
 
     this.streetView.addListener('pano_changed', () => {
       const panoCell = document.getElementById('pano-id');
@@ -46,6 +53,10 @@ export class GuideComponent implements OnInit, AfterViewInit {
     this.streetView.addListener('position_changed', () => {
       const positionCell = document.getElementById('position');
       positionCell.innerHTML = 'POS: ' + this.streetView.getPosition() + '';
+      this.panoInfo.lng = this.streetView.getPosition().lng();
+      this.panoInfo.lat = this.streetView.getPosition().lat();
+
+      // TODO: Send coordinates to viewers
     });
 
     this.streetView.addListener('pov_changed', () => {
@@ -109,6 +120,12 @@ export class GuideComponent implements OnInit, AfterViewInit {
           hubConnection.invoke('SendSignalToViewer', viewerId, JSON.stringify(signal));
         });
         guide.signal(JSON.parse(signal));
+
+        const guide1 = guide;
+        guide.on('connect', () => {
+          this.guide = guide1;
+          guide1.send(JSON.stringify(this.panoInfo));
+        });
       });
     });
   }

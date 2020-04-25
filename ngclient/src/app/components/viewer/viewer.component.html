@@ -1,8 +1,9 @@
 
 <div id="floating-panel">
-    <input id="start-video-btn" type="button" value="Cancel video"/>
+    <input id="start-video-btn" type="button" [value]="videoMuted ? 'Show video' : 'Cancel video'" (click)="showHideGuideVideo()"/>
     <h1>Your guide:</h1>
-    <video></video>
+    <video *ngIf="!videoMuted"></video>
+    <button type="button" (click)="changePosition()">Change Position</button>
 
 </div>
 <div #mapContainer id="pano"></div>
