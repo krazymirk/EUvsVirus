@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef  } from '@angular/core';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { environment } from 'src/environments/environment';
 import {  PositionInfo } from 'src/app/models/PanoInfo';
@@ -16,12 +16,60 @@ export class GuideComponent implements OnInit, AfterViewInit {
 
   streetView: google.maps.StreetViewPanorama;
   guideId: string;
-  guide: any;
   panoInfo: PositionInfo;
+
+  viewers: {id: number, peer: SimplePeer.Instance, connected?: boolean}[] = [];
+  hub: HubConnection;
+  stream: any;
+  connected: boolean;
+
 
   constructor() { }
 
   ngOnInit(): void {
+    this.hub = new HubConnectionBuilder()
+      .withUrl(this.serverUrl + 'connect')
+      .build();
+
+    this.hub.start().then(this.hubStart.bind(this));
+  }
+
+  private sendConnected(data: any) {
+    const str = typeof data === 'object' ? JSON.stringify(data) : data.toString();
+
+    const connected = this.viewers.filter(v => v.connected);
+    connected.forEach(v => v.peer.send(str));
+  }
+
+  private hubStart() {
+    this.hub.invoke('RegisterGuide');
+
+    this.hub.on('SignalToGuide', (viewerId, signal) => {
+      let viewer = this.viewers.find(v => v.id === viewerId);
+      if (!viewer) {
+        const peer = new SimplePeer({ initiator: false });
+        viewer =  {id: viewerId, peer};
+        this.viewers.push(viewer);
+
+        viewer.peer.on('signal', signal => {
+          this.hub.invoke('SendSignalToViewer', viewer.id, JSON.stringify(signal));
+        });
+
+        viewer.peer.on('connect', () => {
+          viewer.connected = true;
+          if (this.stream) {
+            viewer.peer.addStream(this.stream);
+          }
+        });
+      }
+      viewer.peer.signal(JSON.parse(signal));
+    });
+
+    this.hub.on('GuideId', id => {
+      const a = document.querySelector('a');
+      this.guideId = id;
+      a.innerHTML = location.protocol + '//' + location.host + '/viewer/' + id;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -56,7 +104,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
       this.panoInfo.lng = this.streetView.getPosition().lng();
       this.panoInfo.lat = this.streetView.getPosition().lat();
 
-      // TODO: Send coordinates to viewers
+      this.sendConnected(this.panoInfo);
     });
 
     this.streetView.addListener('pov_changed', () => {
@@ -99,35 +147,10 @@ export class GuideComponent implements OnInit, AfterViewInit {
   gotMedia(stream) {
     const video = document.querySelector('video');
     this.addStreamToDom(stream, video);
+    this.stream = stream;
 
-
-    const hubConnection = new HubConnectionBuilder()
-      .withUrl(this.serverUrl + 'connect')
-      .build();
-
-    hubConnection.start().then(() => {
-      hubConnection.invoke('RegisterGuide');
-
-      hubConnection.on('GuideId', id => {
-        const a = document.querySelector('a');
-        this.guideId = id;
-        a.innerHTML = location.protocol + '//' + location.host + '/viewer/' + id;
-      });
-
-      hubConnection.on('SignalToGuide', (viewerId, signal) => {
-        const guide = new SimplePeer({ initiator: false, stream });
-        guide.on('signal', signal => {
-          hubConnection.invoke('SendSignalToViewer', viewerId, JSON.stringify(signal));
-        });
-        guide.signal(JSON.parse(signal));
-
-        const guide1 = guide;
-        guide.on('connect', () => {
-          this.guide = guide1;
-          guide1.send(JSON.stringify(this.panoInfo));
-        });
-      });
-    });
+    const connected = this.viewers.filter(v => v.connected);
+    connected.forEach(c => c.peer.addStream(stream));
   }
 
   addStreamToDom(stream, dom) {
@@ -138,6 +161,10 @@ export class GuideComponent implements OnInit, AfterViewInit {
     }
 
     dom.play();
+  }
+
+  get countConnected() {
+    return this.viewers.filter(v => v.connected).length;
   }
 
   deleteMedia() {

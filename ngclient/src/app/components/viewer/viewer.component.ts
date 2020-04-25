@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
@@ -20,8 +20,12 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   decoder: TextDecoder;
 
   videoMuted = false;
-  stream: any;
-  viewer: any;
+
+  guidePeer: SimplePeer.Instance;
+
+  hub: HubConnection;
+
+  stream: MediaStream;
 
   constructor(private route: ActivatedRoute) {
   }
@@ -49,36 +53,11 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       this.id = params.id;
     });
 
-    const hubConnection = new HubConnectionBuilder()
-    .withUrl(this.serverUrl + 'connect')
-    .build();
+    this.hub = new HubConnectionBuilder()
+      .withUrl(this.serverUrl + 'connect')
+      .build();
 
-    hubConnection.start().then(() => {
-      this.viewer = new SimplePeer( { initiator: true });
-
-      this.viewer.on('signal', signal => {
-        hubConnection.invoke('SendVideoStarted', true, JSON.stringify(signal));
-      });
-
-      hubConnection.on('SignalToViewer', signal => {
-        this.viewer.signal(JSON.parse(signal));
-      });
-
-      this.viewer.on('stream', stream => {
-        const video = document.querySelector('video');
-        this.stream = stream;
-        this.addStreamToDom(stream, video);
-      });
-
-      this.viewer.on('data', (data) => {
-        const decodedData = new TextDecoder('utf-8').decode(data);
-        const mapinfo = JSON.parse(decodedData);
-        console.log('========', mapinfo);
-
-        const position = new google.maps.LatLng(mapinfo.lat, mapinfo.lng);
-        this.streetView.setPosition(position);
-      });
-    });
+    this.hub.start().then(this.hubStart.bind(this));
   }
 
   changePosition() {
@@ -97,11 +76,40 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     }
   }
 
-  addStreamToDom(stream, dom) {
+  private hubStart() {
+    this.guidePeer = new SimplePeer( { initiator: true });
+
+    this.guidePeer.on('signal', signal => {
+      this.hub.invoke('SendSignalToGuide', this.id, JSON.stringify(signal));
+    });
+
+    this.hub.on('SignalToViewer', signal => {
+      this.guidePeer.signal(JSON.parse(signal));
+    });
+
+    this.guidePeer.on('stream', stream => {
+      this.stream = stream;
+
+      const video = document.querySelector('video');
+      this.addStreamToDom(stream, video);
+    });
+
+    this.guidePeer.on('data', data => {
+      const decoder = new TextDecoder('utf-8');
+
+      const positionString = decoder.decode(data);
+      const position = JSON.parse(positionString);
+      const posObj = new google.maps.LatLng(position.lat, position.lng);
+      console.log(data, positionString, position, posObj);
+      this.streetView.setPosition(posObj);
+    });
+  }
+
+  addStreamToDom(stream: MediaStream, dom: HTMLVideoElement) {
     if ('srcObject' in dom) {
       dom.srcObject = stream;
     } else {
-      dom.src = window.URL.createObjectURL(stream); // for older browsers
+      (dom as any).src = window.URL.createObjectURL(stream); // for older browsers
     }
 
     dom.play();
