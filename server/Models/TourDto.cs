@@ -14,8 +14,12 @@ namespace server.Models
 
         public string GuideName { get; set; }
 
+        public string GuideId { get; set; }
+
         public string GuideLink { get; set; }
 
         public string GuestHash { get; set; }
+
+        public string TourHash { get; set; }
     }
 }

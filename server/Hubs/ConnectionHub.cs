@@ -11,8 +11,11 @@ public class ConnectionHub : Hub
     {
         _cacheService = cacheService;
     }
-    public async Task RegisterGuide()
+    public async Task RegisterGuide(string tourHash)
     {
+        var tour = await getTour(tourHash);
+        tour.GuideId = Context.ConnectionId;
+        await _cacheService.SetCacheValueAsync("tour_" + tourHash, JsonConvert.SerializeObject(tour));
         await Clients.Caller.SendAsync("GuideId", Context.ConnectionId);
     }
 
@@ -21,9 +24,10 @@ public class ConnectionHub : Hub
         await Clients.Client(viewerId).SendAsync("SignalToViewer", signal);
     }
 
-    public async Task SendSignalToGuide(string guideId, string signal)
+    public async Task SendSignalToGuide(string tourHash, string signal)
     {
-        await Clients.Client(guideId).SendAsync("SignalToGuide", Context.ConnectionId, signal);
+        var tour = await getTour(tourHash);
+        await Clients.Client(tour.GuideId).SendAsync("SignalToGuide", Context.ConnectionId, signal);
     }
 
     public async Task SyncPosition(double lat, double lng)
@@ -43,6 +47,13 @@ public class ConnectionHub : Hub
     public async Task LeaveTour(string guideId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, guideId);
+    }
+
+    private async Task<Tour> getTour(string tourHash)
+    {
+        var tourId = await _cacheService.GetCacheValueAsync(tourHash);
+        var tourStr = await _cacheService.GetCacheValueAsync("tour_" + tourId);
+        return JsonConvert.DeserializeObject<Tour>(tourStr);
     }
 
 }

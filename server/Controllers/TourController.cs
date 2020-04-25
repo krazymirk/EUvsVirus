@@ -40,7 +40,7 @@ namespace server.Controllers
             incoming.Id = Guid.NewGuid();
 
             var hash = incoming.Id.Hash();
-            incoming.GuestHash = hash;
+            incoming.TourHash = hash;
             await _cacheService.SetCacheValueAsync(hash, incoming.Id.ToString());
             await _cacheService.SetCacheValueAsync("tour_" + incoming.Id.ToString(), JsonConvert.SerializeObject(incoming));
 
