@@ -187,6 +187,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
         lng: this.streetView.getPosition().lng()
       }
     };
+    this.hub.invoke('SyncPosition', position.body.lat, position.body.lng);
 
     this.send(position);
   }

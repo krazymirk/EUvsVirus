@@ -94,6 +94,11 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     this.guidePeer.on('signal', signal => {
       this.hub.invoke('SendSignalToGuide', this.id, JSON.stringify(signal));
     });
+    this.hub.invoke('JoinTour', this.id);
+    this.hub.on('SyncPosition', (lat, lng) => {
+      if (!this.currentPosition) {
+        this.updatePosition({lat, lng});
+      }});
 
     this.hub.on('SignalToViewer', signal => {
       this.guidePeer.signal(JSON.parse(signal));
@@ -139,8 +144,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   private updatePosition(positionData) {
-    const position = new google.maps.LatLng(positionData.lat, positionData.lng);
-    this.streetView.setPosition(position);
+    this.currentPosition = new google.maps.LatLng(positionData.lat, positionData.lng);
+    this.streetView.setPosition(this.currentPosition);
   }
 
   private updateHeading(povData) {
