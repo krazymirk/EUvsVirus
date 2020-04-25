@@ -51,6 +51,13 @@ public class ConnectionHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, guideId);
     }
 
+    public async Task AskQuestion(string tourHash, string question)
+    {
+        var tour = await getTour(tourHash);
+
+        await Clients.Client(tour.GuideId).SendAsync("Question", question, Context.ConnectionId);
+    }
+
     private async Task<Tour> getTour(string tourHash)
     {
         var tourId = await _cacheService.GetCacheValueAsync(tourHash);

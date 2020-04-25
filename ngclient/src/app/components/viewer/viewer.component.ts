@@ -92,6 +92,10 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     this.sendAbilitiesToGuide();
   }
 
+  sendQuestion(question: string) {
+    this.hub.send('AskQuestion', this.id, question);
+  }
+
   private sendAbilitiesToGuide() {
     this.updateAbilitiesProperty();
     const data = {dataType: DataType.ABILITIES, body: this.wantedAbilities};

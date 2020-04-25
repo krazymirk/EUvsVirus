@@ -216,6 +216,12 @@ export class GuideComponent implements OnInit {
       this.guideId = id;
       a.innerHTML = location.protocol + '//' + location.host + '/viewer/' + this.tour.tourHash;
     });
+
+    this.hub.on('Question', this.onQuestion.bind(this));
+  }
+
+  onQuestion(question: string, from: string) {
+    
   }
 
   onData(data: any, viewer: PeerInfo): void {
