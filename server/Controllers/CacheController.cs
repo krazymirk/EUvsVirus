@@ -19,7 +19,7 @@ namespace server.Controllers
             this.cacheService = cacheService;
         }
 
-        [HttpGet("cache/{key}")]
+        [HttpGet("{key}")]
         public async Task<IActionResult> GetCacheValue([FromRoute] string key)
         {
             var value = await this.cacheService.GetCacheValueAsync(key);
@@ -32,7 +32,7 @@ namespace server.Controllers
             return Ok(value);
         }
 
-        [HttpPost("cache")]
+        [HttpPost]
         public async Task<IActionResult> SetCacheValue([FromBody] NewCacheEntryRequest request)
         {
             await this.cacheService.SetCacheValueAsync(request.Key, request.Value);
