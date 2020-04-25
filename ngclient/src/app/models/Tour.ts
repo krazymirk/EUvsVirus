@@ -8,4 +8,5 @@ export interface Tour {
     guideName?: string;
     guideLink?: string;
     guestHash?: string;
+    tourHash: string;
 }

@@ -15,7 +15,7 @@ public class ConnectionHub : Hub
     {
         var tour = await getTour(tourHash);
         tour.GuideId = Context.ConnectionId;
-        await _cacheService.SetCacheValueAsync("tour_" + tourHash, JsonConvert.SerializeObject(tour));
+        await _cacheService.SetCacheValueAsync("tour_" + tour.Id.ToString(), JsonConvert.SerializeObject(tour));
         await Clients.Caller.SendAsync("GuideId", Context.ConnectionId);
     }
 
@@ -30,18 +30,20 @@ public class ConnectionHub : Hub
         await Clients.Client(tour.GuideId).SendAsync("SignalToGuide", Context.ConnectionId, signal);
     }
 
-    public async Task SyncPosition(double lat, double lng)
+    public async Task SyncPosition(string tourHash, double lat, double lng)
     {
-        await _cacheService.SetCacheValueAsync(Context.ConnectionId, JsonConvert.SerializeObject(new Position(){lat = lat, lng = lng}));
+        await _cacheService.SetCacheValueAsync("position_" + tourHash, JsonConvert.SerializeObject(new Position(){Lat = lat, Lng = lng}));
         await Clients.Group(Context.ConnectionId).SendAsync("SyncPosition", lat, lng);
     }
 
-    public async Task JoinTour(string guideId)
+    public async Task JoinTour(string tourHash)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, guideId);
-        var str =  await _cacheService.GetCacheValueAsync(guideId);
-        var p = JsonConvert.DeserializeObject<Position>(str);
-        await Clients.Client(Context.ConnectionId).SendAsync("SyncPosition", p.lat, p.lng);
+        await Groups.AddToGroupAsync(Context.ConnectionId, tourHash);
+        var str =  await _cacheService.GetCacheValueAsync("position_" + tourHash);
+        if(str != null) {
+            var p = JsonConvert.DeserializeObject<Position>(str);
+            await Clients.Client(Context.ConnectionId).SendAsync("SyncPosition", p.Lat, p.Lng);
+        }
     }
 
     public async Task LeaveTour(string guideId)

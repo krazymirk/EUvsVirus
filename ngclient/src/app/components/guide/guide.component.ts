@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy  } from '@angular/core';
-import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnection, HubConnectionState } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { environment } from 'src/environments/environment';
 import {  PositionInfo } from 'src/app/models/PanoInfo';
@@ -29,7 +29,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
   @ViewChild('video', {static: false}) videoDom: ElementRef;
 
   serverUrl = environment.serverUrl;
-  tourId: string;
+  tourHash: string;
   tour: Tour;
 
   streetView: google.maps.StreetViewPanorama;
@@ -52,10 +52,10 @@ export class GuideComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
 
     this.route.params.pipe(take(1)).subscribe((params) => {
-      this.tourId = params.id;
+      this.tourHash = params.id;
     });
 
-    this.http.get(environment.serverUrl + 'idHash').toPromise().then((tour: Tour) => {
+    this.http.get(environment.serverUrl + `api/tour/${this.tourHash}`).toPromise().then((tour: Tour) => {
       if (tour) {
         this.tour = tour;
         this.setStartingPosition();
@@ -80,7 +80,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
   }
 
   private setStartingPosition() {
-    const position = new google.maps.LatLng(this.tour.startPosition.lat, this.tour.startPosition.lat);
+    const position = new google.maps.LatLng(this.tour.startPosition.lat, this.tour.startPosition.lng);
     this.streetView.setPosition(position);
   }
 
@@ -134,7 +134,8 @@ export class GuideComponent implements OnInit, AfterViewInit {
   }
 
   private hubStart() {
-    this.hub.invoke('RegisterGuide', this.tour.idHash);
+    this.sendPosition();
+    this.hub.invoke('RegisterGuide', this.tour.tourHash);
 
     this.hub.on('SignalToGuide', (viewerId, viewerSignal) => {
       let viewer = this.viewers.find(v => v.id === viewerId);
@@ -171,7 +172,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
     this.hub.on('GuideId', id => {
       const a = document.querySelector('a');
       this.guideId = id;
-      a.innerHTML = location.protocol + '//' + location.host + '/viewer/' + id;
+      a.innerHTML = location.protocol + '//' + location.host + '/viewer/' + this.tour.tourHash;
     });
   }
 
@@ -209,7 +210,9 @@ export class GuideComponent implements OnInit, AfterViewInit {
         lng: this.streetView.getPosition().lng()
       }
     };
-    this.hub.invoke('SyncPosition', position.body.lat, position.body.lng);
+    if (this.hub.state === HubConnectionState.Connected) {
+      this.hub.invoke('SyncPosition', this.tour.tourHash, position.body.lat, position.body.lng);
+    }
 
     this.send(position);
   }

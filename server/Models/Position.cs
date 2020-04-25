@@ -2,7 +2,7 @@ namespace server.Models
 {
   public class Position
   {
-      public double lat;
-      public double lng;
+      public double Lat {get; set;}
+      public double Lng {get; set;}
   }
 }

@@ -99,9 +99,9 @@ export class LandingPageComponent implements AfterViewInit {
     };
 
     if (this.tourName !== '') {
-      this.http.post(this.serverUrl + 'tour', tourToCreate).toPromise().then((id) => {
-        if (id && id !== '') {
-          this.navigateToTour(id);
+      this.http.post(this.serverUrl + 'tour', this.tourName).toPromise().then((tour: Tour) => {
+        if (tour) {
+          this.navigateToTour(tour.tourHash);
         }
       }).catch((err: HttpErrorResponse) => {
         console.log('Creating tour failed.', err);
@@ -109,8 +109,8 @@ export class LandingPageComponent implements AfterViewInit {
     }
   }
 
-  private navigateToTour(id: any) {
-    this.router.navigate([`/guide/${id}`]);
+  private navigateToTour(hash: any) {
+    this.router.navigate([`/guide/${hash}`]);
   }
 
 }
