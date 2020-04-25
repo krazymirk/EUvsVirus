@@ -1,0 +1,29 @@
+.example-container {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.example-sidenav-content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 100%;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.example-sidenav {
+  padding: 20vw;
+}
+
+#map {
+  position: inherit !important;
+  height: 50% !important;
+  width: 50% !important;
+}
+/*# sourceMappingURL=landing-page.component.css.map */
