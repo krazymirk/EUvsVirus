@@ -1,6 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using server.Models;
+using server.Services;
 
 namespace server.Controllers
 {
@@ -9,58 +12,39 @@ namespace server.Controllers
     public class TourController : ControllerBase
     {
         private readonly Storage Storage;
+        private ICacheService _cacheService;
 
-
-        public TourController(Storage storage)
+        public TourController(Storage storage, ICacheService cacheService)
         {
             Storage = storage;
+            _cacheService = cacheService;
         }
 
         [HttpGet]
-        [Route("id")]
         [Route("{idHash}")]
-        public IActionResult Get(string idHash)
+        public async Task<IActionResult> Get(string idHash)
         {
-            Guid id;
-            if (idHash == null)
-            {
-                id = Storage.DefaultId;
-            }
-            else
-            {
-                if(!Storage.Hashes.TryGetValue(idHash, out id))
-                {
-                    return NotFound("Hash");
-                }
-            }
-
-            if(!Storage.Tours.TryGetValue(id, out var tour))
+            var tourId = await _cacheService.GetCacheValueAsync(idHash);
+            var tour = await _cacheService.GetCacheValueAsync("tour_" + tourId);
+            if(tour == null)
             {
                 return NotFound("Tour");
             }
 
-            return Ok(new Tour
-            {
-                Name = tour.Name
-            });
+            return Ok(JsonConvert.DeserializeObject<Tour>(tour));
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Tour incoming)
+        public async Task<IActionResult> Post([FromBody] Tour incoming)
         {
-            var id = Guid.NewGuid();
+            incoming.Id = Guid.NewGuid();
 
-            var tour = new Tour
-            {
-                Id = id,
-                Name = incoming.Name
-            };
-            Storage.Tours.AddOrUpdate(id, tour);
-            
-            var hash = id.Hash();
-            Storage.Hashes.Add(hash, id);
+            var hash = incoming.Id.Hash();
+            incoming.GuestHash = hash;
+            await _cacheService.SetCacheValueAsync(hash, incoming.Id.ToString());
+            await _cacheService.SetCacheValueAsync("tour_" + incoming.Id.ToString(), JsonConvert.SerializeObject(incoming));
 
-            return Ok(hash);
+            return Ok(incoming);
         }
     }
 }
