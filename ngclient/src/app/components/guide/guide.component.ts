@@ -4,6 +4,12 @@ import * as SimplePeer from 'simple-peer';
 import { environment } from 'src/environments/environment';
 import {  PositionInfo } from 'src/app/models/PanoInfo';
 
+interface PeerInfo {
+  id: number;
+  peer: SimplePeer.Instance;
+  connected?: boolean;
+}
+
 @Component({
   selector: 'app-guide',
   templateUrl: './guide.component.html',
@@ -18,7 +24,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
   guideId: string;
   panoInfo: PositionInfo;
 
-  viewers: {id: number, peer: SimplePeer.Instance, connected?: boolean}[] = [];
+  viewers: PeerInfo[] = [];
   hub: HubConnection;
   stream: any;
   connected: boolean;
@@ -34,11 +40,20 @@ export class GuideComponent implements OnInit, AfterViewInit {
     this.hub.start().then(this.hubStart.bind(this));
   }
 
-  private sendConnected(data: any) {
+  private send(data: any, ...viewers: PeerInfo[]) {
     const str = typeof data === 'object' ? JSON.stringify(data) : data.toString();
 
-    const connected = this.viewers.filter(v => v.connected);
-    connected.forEach(v => v.peer.send(str));
+    if (!viewers || !viewers.length) {
+      viewers = this.viewers.filter(v => v.connected);
+    } else {
+      const notConnected = viewers.filter(v => !v.connected);
+      if (notConnected.length) {
+        console.error('Tried to send to not connected peer', notConnected);
+      } else {
+        viewers = viewers.filter(v => v.connected);
+      }
+    }
+    viewers.forEach(v => v.peer.send(str));
   }
 
   private hubStart() {
@@ -57,6 +72,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
 
         viewer.peer.on('connect', () => {
           viewer.connected = true;
+          this.send(this.panoInfo, viewer);
           if (this.stream) {
             viewer.peer.addStream(this.stream);
           }
@@ -104,7 +120,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
       this.panoInfo.lng = this.streetView.getPosition().lng();
       this.panoInfo.lat = this.streetView.getPosition().lat();
 
-      this.sendConnected(this.panoInfo);
+      this.send(this.panoInfo);
     });
 
     this.streetView.addListener('pov_changed', () => {
