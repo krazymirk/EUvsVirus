@@ -30,6 +30,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
   stream: any;
   connected: boolean;
 
+  isBroadcasting = false;
 
   constructor() { }
 
@@ -126,23 +127,8 @@ export class GuideComponent implements OnInit, AfterViewInit {
       pitch: mapOptions.pov.pitch
     };
 
-    this.streetView.addListener('pano_changed', () => {
-      const panoCell = document.getElementById('pano-id');
-      panoCell.innerHTML = 'PANO ID: ' + this.streetView.getPano();
-    });
-
     this.streetView.addListener('position_changed', () => {
-      const positionCell = document.getElementById('position');
-      positionCell.innerHTML = 'POS: ' + this.streetView.getPosition() + '';
-
       this.sendPosition();
-    });
-
-    this.streetView.addListener('pov_changed', () => {
-      const headingCell = document.getElementById('heading');
-      const pitchCell = document.getElementById('pitch');
-      headingCell.innerHTML = 'HEAD: ' + this.streetView.getPov().heading + '';
-      pitchCell.innerHTML = 'PITCH: ' + this.streetView.getPov().pitch + '';
     });
   }
 
@@ -172,23 +158,9 @@ export class GuideComponent implements OnInit, AfterViewInit {
   }
 
   toggleVideo() {
-    if (document.querySelector('video').hasChildNodes()) {
-        this.deleteMedia();
-    } else {
-        this.getMedia();
-    }
-
-    this.changeVideoButtonText();
-  }
-
-  changeVideoButtonText() {
-    const defaultButtonText = 'Start video';
-    const button = document.getElementById('start-video-btn') as HTMLButtonElement;
-
-    if (button.value === defaultButtonText) {
-        button.value = 'Stop video';
-    } else {
-        button.value = defaultButtonText;
+    this.isBroadcasting = !this.isBroadcasting;
+    if (this.isBroadcasting) {
+      this.getMedia();
     }
   }
 

@@ -20,7 +20,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   id: string;
   decoder: TextDecoder;
 
-  videoMuted = false;
+  isBroadcasting = true;
 
   guidePeer: SimplePeer.Instance;
 
@@ -71,13 +71,17 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     this.streetView.setPov({heading: 270, pitch: 0});
   }
 
-  showHideGuideVideo() {
-    this.videoMuted = !this.videoMuted;
-    if (!this.videoMuted) {
+  toggleVideo() {
+    this.isBroadcasting = !this.isBroadcasting;
+    if (this.isBroadcasting) {
       const video = document.querySelector('video');
       // TODO: recover streaming
       this.addStreamToDom(this.stream, video);
     }
+  }
+
+  toggleAudio() {
+    // mute
   }
 
   private hubStart() {

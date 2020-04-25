@@ -1,11 +1,12 @@
 
 <div id="floating-panel">
-    <img class="icons" src="./../../../assets/icons/speaker_off.svg">
-    <img class="icons" src="./../../../assets/icons/speaker_on.svg">
-    <input id="start-video-btn" type="button" [value]="videoMuted ? 'Show video' : 'Cancel video'" (click)="showHideGuideVideo()"/>
-    <h1>Your guide:</h1>
-    <video [hidden]="videoMuted"></video>
-    <button type="button" (click)="changePosition()">Change Position</button>
-
+    <div id="icons">
+        <input id="start-video-btn" type="button" value="Stop video" (click)="toggleVideo()" />
+        <input id="start-video-btn" type="button" value="Mute guide" (click)="toggleAudio()" />
+    </div>
 </div>
+<div id="video-container" [hidden]="!isBroadcasting">
+    <video></video>
+</div>
+
 <div #mapContainer id="pano"></div>
