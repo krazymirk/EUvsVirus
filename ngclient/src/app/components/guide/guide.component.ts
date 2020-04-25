@@ -1,13 +1,17 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef  } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy  } from '@angular/core';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { environment } from 'src/environments/environment';
 import {  PositionInfo } from 'src/app/models/PanoInfo';
 import { DataFormat, DataType } from 'src/app/models/DataFormat';
+import { Abilities } from 'src/app/models/Abilities';
+import { Observable, Subscriber, Subscription } from 'rxjs';
+import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
 
 interface PeerInfo {
   id: number;
   peer: SimplePeer.Instance;
+  abilities: Abilities;
   connected?: boolean;
 }
 
@@ -18,6 +22,7 @@ interface PeerInfo {
 })
 export class GuideComponent implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', {static: false}) pano: ElementRef;
+  @ViewChild('video', {static: false}) videoDom: ElementRef;
 
   serverUrl = environment.serverUrl;
 
@@ -27,25 +32,64 @@ export class GuideComponent implements OnInit, AfterViewInit {
 
   viewers: PeerInfo[] = [];
   hub: HubConnection;
-  stream: any;
+  videoStream: MediaStream;
+  audioStream: MediaStream;
   connected: boolean;
-
+  abilities: Abilities = {
+    video: true,
+    audio: false
+  };
 
   constructor() { }
 
   ngOnInit(): void {
+
     this.hub = new HubConnectionBuilder()
       .withUrl(this.serverUrl + 'connect')
       .build();
 
     this.hub.start().then(this.hubStart.bind(this));
+
+    this.getAudioVideoStreams().then(([a, v]) => {
+      this.audioStream = a;
+      this.videoStream = v;
+      this.changeVideoDomStream();
+    });
   }
 
-  private send(data: any, ...viewers: PeerInfo[]) {
-    const str = typeof data === 'object' ? JSON.stringify(data) : data.toString();
+  private updateStream(stream: MediaStream) {
+    this.changeVideoDomStream();
+  }
+
+  toggleVideo() {
+    this.abilities.video = !this.abilities.video;
+  }
+
+  toggleAudio() {
+    this.abilities.audio = !this.abilities.audio;
+  }
+
+  private updateAbilities() {
+    const viewers = this.getConnectedViewers();
+
+    // viewers.forEach(v => v.peer.removeStream(this.stream));
+
+    // this.getNewMedia().then(stream => {
+    //   this.stream = stream;
+
+    //   viewers.forEach(v => v.peer.addStream(this.stream.));
+    // });
+  }
+
+  private getConnectedViewers() {
+    return this.viewers.filter(v => v.connected);
+  }
+
+  private send(data: DataFormat, ...viewers: PeerInfo[]) {
+    const str = JSON.stringify(data);
 
     if (!viewers || !viewers.length) {
-      viewers = this.viewers.filter(v => v.connected);
+      viewers = this.getConnectedViewers();
     } else {
       const notConnected = viewers.filter(v => !v.connected);
       if (notConnected.length) {
@@ -69,11 +113,11 @@ export class GuideComponent implements OnInit, AfterViewInit {
   private hubStart() {
     this.hub.invoke('RegisterGuide');
 
-    this.hub.on('SignalToGuide', (viewerId, signal) => {
+    this.hub.on('SignalToGuide', (viewerId, viewerSignal) => {
       let viewer = this.viewers.find(v => v.id === viewerId);
       if (!viewer) {
         const peer = new SimplePeer({ initiator: false });
-        viewer =  {id: viewerId, peer};
+        viewer =  {id: viewerId, peer, abilities: this.abilities};
         this.viewers.push(viewer);
 
         viewer.peer.on('signal', signal => {
@@ -82,9 +126,12 @@ export class GuideComponent implements OnInit, AfterViewInit {
 
         viewer.peer.on('connect', () => {
           viewer.connected = true;
-          this.send(this.panoInfo, viewer);
-          if (this.stream) {
-            viewer.peer.addStream(this.stream);
+          this.send(this.panoInfo as any, viewer);
+          if (this.audioStream) {
+            viewer.peer.addStream(this.audioStream);
+          }
+          if (this.videoStream) {
+            viewer.peer.addStream(this.videoStream);
           }
         });
 
@@ -95,7 +142,7 @@ export class GuideComponent implements OnInit, AfterViewInit {
 
         viewer.peer.on('error', console.error);
       }
-      viewer.peer.signal(JSON.parse(signal));
+      viewer.peer.signal(JSON.parse(viewerSignal));
     });
 
     this.hub.on('GuideId', id => {
@@ -171,16 +218,6 @@ export class GuideComponent implements OnInit, AfterViewInit {
     this.send(heading);
   }
 
-  toggleVideo() {
-    if (document.querySelector('video').hasChildNodes()) {
-        this.deleteMedia();
-    } else {
-        this.getMedia();
-    }
-
-    this.changeVideoButtonText();
-  }
-
   changeVideoButtonText() {
     const defaultButtonText = 'Start video';
     const button = document.getElementById('start-video-btn') as HTMLButtonElement;
@@ -192,37 +229,35 @@ export class GuideComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getMedia() {
-    // get video/voice stream
-    navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: false
-    }).then(this.gotMedia.bind(this)).catch(() => {});
+  getAudioVideoStreams() {
+    this.destroyStreams();
+
+    const audioPromise = navigator.mediaDevices.getUserMedia({audio: true});
+    const videoPromise = navigator.mediaDevices.getUserMedia({video: true});
+
+    return Promise.all([audioPromise, videoPromise]);
   }
 
-  gotMedia(stream) {
-    const video = document.querySelector('video');
-    this.addStreamToDom(stream, video);
-    this.stream = stream;
-
-    const connected = this.viewers.filter(v => v.connected);
-    connected.forEach(c => c.peer.addStream(stream));
+  private destroyStreams() {
+    this.destroyAudioStream();
+    this.destroyVideoStream();
   }
 
-  addStreamToDom(stream, dom) {
-    if ('srcObject' in dom) {
-      dom.srcObject = stream;
-    } else {
-      dom.src = window.URL.createObjectURL(stream); // for older browsers
-    }
+  private destroyAudioStream() {
+    destroyStream(this.audioStream);
+    this.audioStream = undefined;
+  }
 
-    dom.play();
+  private destroyVideoStream() {
+    destroyStream(this.videoStream);
+    this.videoStream = undefined;
+  }
+
+  changeVideoDomStream() {
+    changeDomStream(this.videoStream, this.videoDom.nativeElement);
   }
 
   get countConnected() {
     return this.viewers.filter(v => v.connected).length;
-  }
-
-  deleteMedia() {
   }
 }

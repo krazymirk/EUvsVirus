@@ -2,9 +2,9 @@
 <div id="floating-panel">
     <img class="icons" src="./../../../assets/icons/speaker_off.svg">
     <img class="icons" src="./../../../assets/icons/speaker_on.svg">
-    <input id="start-video-btn" type="button" [value]="videoMuted ? 'Show video' : 'Cancel video'" (click)="showHideGuideVideo()"/>
     <h1>Your guide:</h1>
-    <video [hidden]="videoMuted"></video>
+    <video [hidden]="videoMuted" #video></video>
+    <audio #audio></audio>
     <button type="button" (click)="changePosition()">Change Position</button>
 
 </div>

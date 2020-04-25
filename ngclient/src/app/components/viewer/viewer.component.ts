@@ -1,10 +1,11 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { DataFormat, DataType } from 'src/app/models/DataFormat';
+import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
 
 @Component({
   selector: 'app-viewer',
@@ -13,6 +14,8 @@ import { DataFormat, DataType } from 'src/app/models/DataFormat';
 })
 export class ViewerComponent implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', {static: false}) pano: ElementRef;
+  @ViewChild('video', {static: false}) videoDom: ElementRef<HTMLVideoElement>;
+  @ViewChild('audio', {static: false}) audioDom: ElementRef<HTMLAudioElement>;
 
   serverUrl = environment.serverUrl;
 
@@ -26,7 +29,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
 
   hub: HubConnection;
 
-  stream: MediaStream;
+  audioStream: MediaStream;
+  videoStream: MediaStream;
 
   currentPosition: google.maps.LatLng;
   currentHeading: google.maps.StreetViewPov;
@@ -71,15 +75,6 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     this.streetView.setPov({heading: 270, pitch: 0});
   }
 
-  showHideGuideVideo() {
-    this.videoMuted = !this.videoMuted;
-    if (!this.videoMuted) {
-      const video = document.querySelector('video');
-      // TODO: recover streaming
-      this.addStreamToDom(this.stream, video);
-    }
-  }
-
   private hubStart() {
     this.guidePeer = new SimplePeer( { initiator: true });
 
@@ -91,11 +86,16 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       this.guidePeer.signal(JSON.parse(signal));
     });
 
-    this.guidePeer.on('stream', stream => {
-      this.stream = stream;
+    this.guidePeer.on('stream', (stream: MediaStream) => {
+      this.destroyStreams();
 
-      const video = document.querySelector('video');
-      this.addStreamToDom(stream, video);
+      if (stream.getVideoTracks().length) {
+        this.videoStream = stream;
+        this.changeVideoDomStream();
+      } else if (stream.getAudioTracks().length) {
+        this.audioStream = stream;
+        this.changeAudioDomStream();
+      }
     });
 
     this.guidePeer.on('data', data => {
@@ -106,6 +106,23 @@ export class ViewerComponent implements OnInit, AfterViewInit {
         this.updatePosition(parsed.body);
       }
     });
+
+    this.guidePeer.on('error', console.error);
+  }
+
+  private destroyStreams() {
+    this.destroyAudioStream();
+    this.destroyVideoStream();
+  }
+
+  private destroyAudioStream() {
+    destroyStream(this.audioStream);
+    this.audioStream = undefined;
+  }
+
+  private destroyVideoStream() {
+    destroyStream(this.videoStream);
+    this.videoStream = undefined;
   }
 
   private updatePosition(positionData) {
@@ -128,13 +145,11 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     return JSON.parse(dataString);
   }
 
-  addStreamToDom(stream: MediaStream, dom: HTMLVideoElement) {
-    if ('srcObject' in dom) {
-      dom.srcObject = stream;
-    } else {
-      (dom as any).src = window.URL.createObjectURL(stream); // for older browsers
-    }
+  changeVideoDomStream() {
+    changeDomStream(this.videoStream, this.videoDom.nativeElement);
+  }
 
-    dom.play();
+  changeAudioDomStream() {
+    changeDomStream(this.audioStream, this.audioDom.nativeElement);
   }
 }
