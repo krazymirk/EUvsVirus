@@ -3,13 +3,13 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Tour } from 'src/app/models/Tour';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { Subscriber } from 'rxjs';
 import { StartingPosition } from 'src/app/models/Position';
-import { Observable, Subscription } from 'rxjs';
 
 export interface HithereConfig {
   hub: signalR.HubConnection;
   tourHash: string;
-  position: Subscription;
+  position: Subscriber<StartingPosition>;
 }
 
 export interface HithereData {
