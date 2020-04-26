@@ -16,7 +16,6 @@ video {
     top: 12vh;
     left: 5vw;
     z-index: 5;
-    border: 1px solid white;
     outline: medium;
 }
 
