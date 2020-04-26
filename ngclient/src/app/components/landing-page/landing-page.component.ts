@@ -25,7 +25,7 @@ export class LandingPageComponent implements AfterViewInit,OnInit {
     });
   }
   ngAfterViewInit(): void {
-    this.map = new google.maps.Map(document.getElementById('map'), {
+    this.map = new google.maps.Map(document.getElementById('mapTour'), {
       center: {lat: -33.8688, lng: 151.2195},
       zoom: 13,
       mapTypeId: 'roadmap'
