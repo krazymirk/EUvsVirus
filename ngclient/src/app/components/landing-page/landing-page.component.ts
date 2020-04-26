@@ -91,6 +91,18 @@ export class LandingPageComponent implements AfterViewInit, OnInit {
           position: place.geometry.location
         }));
 
+        this.map.getStreetView().addListener('pano_changed', () => {
+          if (this.map.getStreetView()) {
+            this.adjustedPosition = {
+              lat: (this.map.getStreetView() as any).location.latLng.lat(),
+              lng: (this.map.getStreetView() as any).location.latLng.lng(),
+              heading: this.map.getStreetView().getPov().heading,
+              pitch: this.map.getStreetView().getPov().pitch,
+              zoom: this.map.getStreetView().getZoom(),
+            } as StartingPosition;
+          }
+       });
+
         this.map.getStreetView().addListener('position_changed', () => {
           this.adjustedPosition = {
             lat: this.map.getStreetView().getPosition().lat(),
@@ -99,16 +111,16 @@ export class LandingPageComponent implements AfterViewInit, OnInit {
             pitch: this.map.getStreetView().getPov().pitch,
             zoom: this.map.getStreetView().getZoom(),
           } as StartingPosition;
-       });
+      });
 
         this.map.getStreetView().addListener('pov_changed', () => {
-          this.adjustedPosition = {
-            lat: this.map.getStreetView().getPosition().lat(),
-            lng: this.map.getStreetView().getPosition().lng(),
-            heading: this.map.getStreetView().getPov().heading,
-            pitch: this.map.getStreetView().getPov().pitch,
-            zoom: this.map.getStreetView().getZoom(),
-          } as StartingPosition;
+            this.adjustedPosition = {
+              lat: this.map.getStreetView().getPosition().lat(),
+              lng: this.map.getStreetView().getPosition().lng(),
+              heading: this.map.getStreetView().getPov().heading,
+              pitch: this.map.getStreetView().getPov().pitch,
+              zoom: this.map.getStreetView().getZoom(),
+            } as StartingPosition;
         });
 
         this.markedLocation = place.geometry.location;
