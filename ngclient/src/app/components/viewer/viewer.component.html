@@ -14,8 +14,6 @@
         <button mat-raised-button class="mat-accent mr-16" style="margin-left:1em;" (click)="sendQuestion('da')">ASK</button>
         </div>
     </div>
-    <input matInput placeholder="Ex. Pizza" [(ngModel)]="question"/>
-    <button (click)="sendQuestion('da')">ASK</button>
     {{this.isConnectionActive}}
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
