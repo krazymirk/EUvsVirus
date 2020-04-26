@@ -1,12 +1,15 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, EventEmitter, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Tour } from 'src/app/models/Tour';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { StartingPosition } from 'src/app/models/Position';
+import { Observable, Subscription } from 'rxjs';
 
 export interface HithereConfig {
   hub: signalR.HubConnection;
   tourHash: string;
+  position: Subscription;
 }
 
 export interface HithereData {
@@ -36,6 +39,7 @@ export class HithereComponent implements OnInit {
       .then((tour: Tour) => {
         if (tour) {
           this.tour = tour;
+          this.config.position.next(tour.startPosition);
         }
       })
       .catch(err => {
