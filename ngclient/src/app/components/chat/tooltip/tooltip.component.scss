@@ -1,0 +1,45 @@
+$border-color: #ccc;
+$tooltip-body-color: #fff;
+$tooltip-arrow-width: 10px;
+
+
+.container {
+    box-shadow: 0 0 5px rgba(0, 0, 0, .2);
+    margin: 1rem;
+    margin-top: .7rem;
+    margin-right: 2rem;
+    min-width: 50px;
+    max-width: 400px;
+    background: $tooltip-body-color;
+    border: 1px solid $border-color;
+    pointer-events: none;
+    position: relative;
+    min-height: 1rem;
+    padding: 1rem;
+
+  &:after,
+  &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: 100%;
+      width: 0;
+      height: 0;
+      border-style: solid;
+  }
+
+  &:after {
+      left: 100%;
+      top: 34%;
+      border-color: transparent transparent transparent $tooltip-body-color;
+      border-width: $tooltip-arrow-width;
+  }
+
+  &:before {
+      left: 100%;
+      top: 30%;
+      border-color: transparent transparent transparent $border-color;
+      border-width: $tooltip-arrow-width + 2px;
+  }
+}
+

@@ -11,6 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Tour } from 'src/app/models/Tour';
+import { ChatComponent } from '../chat/chat.component';
 
 interface PeerInfo {
   id: number;
@@ -31,7 +32,7 @@ export class GuideComponent implements OnInit {
   @ViewChild('streetViewContainer', {static: false}) panoRef: ElementRef;
   @ViewChild('mapContainer', {static: false}) mapRef: ElementRef;
   @ViewChild('video', {static: false}) videoDom: ElementRef;
-
+  @ViewChild('chat', {static: false}) chat: ChatComponent;
   serverUrl = environment.serverUrl;
   tourHash: string;
   tour: Tour;
@@ -76,7 +77,6 @@ export class GuideComponent implements OnInit {
     this.hub = new HubConnectionBuilder()
       .withUrl(this.serverUrl + 'connect')
       .build();
-
 
     this.getAudioVideoStreams().then(([a, v]) => {
       this.audioStream = a;
@@ -266,7 +266,7 @@ export class GuideComponent implements OnInit {
   }
 
   onQuestion(question: string, from: string) {
-    
+    this.chat.setmessage({message: question, name: from});
   }
 
   onData(data: any, viewer: PeerInfo): void {

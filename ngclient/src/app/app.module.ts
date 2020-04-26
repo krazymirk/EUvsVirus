@@ -12,6 +12,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './shared/material/material.module';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { AvatarModule } from 'ngx-avatar';
+import { TooltipComponent } from './components/chat/tooltip/tooltip.component';
+import { TooltipDirective } from './components/chat/tooltip/tooltip.directive';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -19,6 +23,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     ViewerComponent,
     LandingPageComponent,
     ChatComponent,
+    TooltipComponent,
+    TooltipDirective
   ],
   imports: [
     BrowserModule,
@@ -30,7 +36,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MaterialModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    AvatarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

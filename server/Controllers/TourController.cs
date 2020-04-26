@@ -27,24 +27,17 @@ namespace server.Controllers
         {
             if (_tourService.IsPrivateAndInUse(idHash))
             {
-                return Forbid("Private link already in use");
+                return StatusCode(403);
             }
 
-            var tourId = await _cacheService.GetCacheValueAsync(idHash);
-            var tour = await _cacheService.GetCacheValueAsync("tour_" + tourId);
-            if(tour == null)
-            {
-                return NotFound("Tour");
-            }
-
-            var tourObject = JsonConvert.DeserializeObject<Tour>(tour);
+            var tour = await _tourService.Get(idHash);
 
             return Ok(new Tour
             {
-                Name = tourObject.Name,
-                StartDateTime = tourObject.StartDateTime,
-                StartPosition = tourObject.StartPosition,
-                TourHash = tourObject.TourHash
+                Name = tour.Name,
+                StartDateTime = tour.StartDateTime,
+                StartPosition = tour.StartPosition,
+                TourHash = tour.TourHash
             });
         }
 

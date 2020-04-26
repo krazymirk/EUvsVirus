@@ -7,6 +7,8 @@ import { environment } from 'src/environments/environment';
 import { DataFormat, DataType } from 'src/app/models/DataFormat';
 import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
 import { Abilities } from 'src/app/models/Abilities';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Tour } from 'src/app/models/Tour';
 
 @Component({
   selector: 'app-viewer',
@@ -41,8 +43,10 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   wantedAbilities: Abilities = {audio: true, video: true};
 
   abilities: Abilities;
+  question: string;
+  tour: Tour;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private http: HttpClient) {
   }
 
   ngAfterViewInit(): void {
@@ -68,11 +72,22 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       this.id = params.id;
     });
 
-    this.hub = new HubConnectionBuilder()
-      .withUrl(this.serverUrl + 'connect')
-      .build();
-
-    this.hub.start().then(this.hubStart.bind(this));
+    this.http.get(environment.serverUrl + `api/tour/${this.id}`).toPromise()
+      .then((tour: Tour) => {
+        if (tour) {
+          this.tour = tour;
+          this.hub = new HubConnectionBuilder()
+            .withUrl(this.serverUrl + 'connect')
+            .build();
+          this.hub.start().then(this.hubStart.bind(this));
+        }
+      })
+      .catch(err => {
+        if (err instanceof HttpErrorResponse && err.status === 403) {
+          alert('Your private link is already in use by someone.');
+          window.document.body.innerHTML = '';
+        }
+      });
   }
 
   changePosition() {
@@ -93,7 +108,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   sendQuestion(question: string) {
-    this.hub.send('AskQuestion', this.id, question);
+    this.hub.send('AskQuestion', this.id, this.question);
   }
 
   private sendAbilitiesToGuide() {
