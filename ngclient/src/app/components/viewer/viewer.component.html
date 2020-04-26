@@ -14,6 +14,7 @@
         <button mat-raised-button class="mat-accent mr-16" style="margin-left:1em;" (click)="sendQuestion('da')">ASK</button>
         </div>
     </div>
+    {{this.isConnectionActive}}
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
     <video #video></video>
