@@ -113,7 +113,7 @@ export class GuideComponent implements OnInit {
     //   console.log('Error getting private links', err);
     // });
 
-    this.privateLinks = ['asdfadsf', 'dsafdsafdsa', 'asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','safddsafdsa'];
+    this.privateLinks = ['asdfadsf', 'sf', 'dsafdsafdsa',' safddsafdsa'];
   }
 
   getPublicLink() {
