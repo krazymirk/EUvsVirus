@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Tour } from 'src/app/models/Tour';
 import { DatePipe, formatDate } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { StartingPosition } from 'src/app/models/Position';
 
 @Component({
   selector: 'app-landing-page',
@@ -20,7 +21,7 @@ export class LandingPageComponent implements AfterViewInit, OnInit {
   markedLocation: google.maps.LatLng;
   transformDate: string;
   tourForm: FormGroup;
-  adjustedPosition: google.maps.LatLng;
+  adjustedPosition: StartingPosition;
 
   constructor(private http: HttpClient, private router: Router, private formBuilder: FormBuilder) { }
 
@@ -89,9 +90,37 @@ export class LandingPageComponent implements AfterViewInit, OnInit {
           position: place.geometry.location
         }));
 
-        this.map.getStreetView().addListener('position_changed', () => {
-          this.adjustedPosition = this.map.getStreetView().getPosition();
+        this.map.getStreetView().addListener('pano_changed', () => {
+          if (this.map.getStreetView()) {
+            this.adjustedPosition = {
+              lat: (this.map.getStreetView() as any).location.latLng.lat(),
+              lng: (this.map.getStreetView() as any).location.latLng.lng(),
+              heading: this.map.getStreetView().getPov().heading,
+              pitch: this.map.getStreetView().getPov().pitch,
+              zoom: this.map.getStreetView().getZoom(),
+            } as StartingPosition;
+          }
        });
+
+        this.map.getStreetView().addListener('position_changed', () => {
+          this.adjustedPosition = {
+            lat: this.map.getStreetView().getPosition().lat(),
+            lng: this.map.getStreetView().getPosition().lng(),
+            heading: this.map.getStreetView().getPov().heading,
+            pitch: this.map.getStreetView().getPov().pitch,
+            zoom: this.map.getStreetView().getZoom(),
+          } as StartingPosition;
+      });
+
+        this.map.getStreetView().addListener('pov_changed', () => {
+            this.adjustedPosition = {
+              lat: this.map.getStreetView().getPosition().lat(),
+              lng: this.map.getStreetView().getPosition().lng(),
+              heading: this.map.getStreetView().getPov().heading,
+              pitch: this.map.getStreetView().getPov().pitch,
+              zoom: this.map.getStreetView().getZoom(),
+            } as StartingPosition;
+        });
 
         this.markedLocation = place.geometry.location;
 
@@ -113,27 +142,31 @@ export class LandingPageComponent implements AfterViewInit, OnInit {
     }
 
     if (!this.adjustedPosition) {
-      this.adjustedPosition = this.markedLocation;
+      this.adjustedPosition = {
+        lat: this.markedLocation.lat(),
+        lng: this.markedLocation.lng()
+      };
     }
 
     const tourToCreate: Tour = {
       startPosition: {
-        lat: this.adjustedPosition.lat(),
-        lng: this.adjustedPosition.lng()
+        lat: this.adjustedPosition.lat,
+        lng: this.adjustedPosition.lng,
+        heading: this.adjustedPosition.heading,
+        pitch: this.adjustedPosition.pitch,
+        zoom: this.adjustedPosition.zoom
       },
       name: this.tourName,
       startDateTime: this.tourDate,
     };
 
-    if (this.tourName !== '') {
-      this.http.post(this.serverUrl + 'api/tour', tourToCreate).toPromise().then((tour: Tour) => {
-        if (tour) {
-          this.navigateToTour(tour.tourHash);
-        }
-      }).catch((err: HttpErrorResponse) => {
-        console.log('Creating tour failed.', err);
-      });
-    }
+    this.http.post(this.serverUrl + 'api/tour', tourToCreate).toPromise().then((tour: Tour) => {
+      if (tour) {
+        this.navigateToTour(tour.tourHash);
+      }
+    }).catch((err: HttpErrorResponse) => {
+      console.log('Creating tour failed.', err);
+    });
   }
 
   private navigateToTour(hash: any) {

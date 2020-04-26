@@ -12,6 +12,7 @@ import { take } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Tour } from 'src/app/models/Tour';
 import { ChatComponent } from '../chat/chat.component';
+import { StartingPosition } from 'src/app/models/Position';
 
 interface PeerInfo {
   id: number;
@@ -69,7 +70,7 @@ export class GuideComponent implements OnInit {
       if (tour) {
         this.tour = tour;
         this.initializeMap();
-        this.setStartingPosition();
+        this.setStartingPosition(tour.startPosition);
         this.hub.start().then(this.hubStart.bind(this));
       }
     });
@@ -87,9 +88,14 @@ export class GuideComponent implements OnInit {
     this.decoder = new TextDecoder('utf-8');
   }
 
-  private setStartingPosition() {
-    const position = new google.maps.LatLng(this.tour.startPosition.lat, this.tour.startPosition.lng);
+  private setStartingPosition(startingPosition: StartingPosition) {
+    const position = new google.maps.LatLng(startingPosition.lat, startingPosition.lng);
     this.streetView.setPosition(position);
+
+    if (startingPosition.heading && startingPosition.pitch && startingPosition.zoom) {
+      this.streetView.setPov({heading: startingPosition.heading, pitch: startingPosition.pitch});
+      this.streetView.setZoom(startingPosition.zoom);
+    }
     this.map.setCenter(position);
   }
 
@@ -319,7 +325,8 @@ export class GuideComponent implements OnInit {
       }
     };
     if (this.hub.state === HubConnectionState.Connected) {
-      this.hub.invoke('SyncPosition', this.tour.tourHash, position.body.lat, position.body.lng);
+      this.hub.invoke('SyncPosition', this.tour.tourHash, position.body.lat, position.body.lng,
+                this.streetView.getPov().heading, this.streetView.getPov().pitch, this.streetView.getZoom());
     }
 
     this.send(position);
@@ -379,8 +386,8 @@ export class GuideComponent implements OnInit {
   get countConnected() {
     return this.viewers.filter(v => v.connected).length;
   }
-  copyLink(link,id){
-    let selBox = document.createElement('textarea');
+  copyLink(link, id){
+    const selBox = document.createElement('textarea');
     selBox.style.position = 'fixed';
     selBox.style.left = '0';
     selBox.style.top = '0';
@@ -391,11 +398,10 @@ export class GuideComponent implements OnInit {
     selBox.select();
     document.execCommand('copy');
     document.body.removeChild(selBox);
-debugger;
-    let button = document.getElementById(id.currentTarget.id);
-    button.innerText = 'Copied!'
+    const button = document.getElementById(id.currentTarget.id);
+    button.innerText = 'Copied!';
     setTimeout(() => {
-      button.innerText = 'Copy Link'
-    }, 3000)
+      button.innerText = 'Copy Link';
+    }, 3000);
   }
 }

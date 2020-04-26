@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy, EventEmitter } from '@angular/core';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import * as SimplePeer from 'simple-peer';
 import { ActivatedRoute } from '@angular/router';
@@ -11,6 +11,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Tour } from 'src/app/models/Tour';
 import { MatDialogConfig, MatDialog } from '@angular/material/dialog';
 import { HithereComponent, HithereConfig, HithereData } from '../hithere/hithere.component';
+import { Observable } from 'rxjs';
+import { StartingPosition } from 'src/app/models/Position';
 
 @Component({
   selector: 'app-viewer',
@@ -79,18 +81,25 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     this.route.params.pipe(take(1)).subscribe((params) => {
       this.id = params.id;
 
-      this.dialog.open(HithereComponent, {
-        disableClose: true,
-        autoFocus: true,
-        width: '50vw',
-        data: {
-          hub: this.hub,
-          tourHash: this.id
-        } as HithereConfig
-      }).afterClosed().toPromise().then((data: HithereData) => {
-        this.tour = data.tour;
-        this.nickname = data.nickname;
-        this.hub.start().then(this.hubStart.bind(this));
+      const position = new Observable<StartingPosition>(subscription => {
+        this.dialog.open(HithereComponent, {
+          disableClose: true,
+          autoFocus: true,
+          width: '50vw',
+          data: {
+            hub: this.hub,
+            tourHash: this.id,
+            position: subscription
+          } as HithereConfig
+        }).afterClosed().toPromise().then((data: HithereData) => {
+          this.tour = data.tour;
+          this.nickname = data.nickname;
+          this.hub.start().then(this.hubStart.bind(this));
+        });
+      });
+      position.pipe(take(1)).subscribe(data => {
+        this.updatePosition(data);
+        this.currentPosition = undefined;
       });
     });
   }
@@ -126,9 +135,9 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   private hubStart() {
 
     this.hub.invoke('JoinTour', this.id);
-    this.hub.on('SyncPosition', (lat, lng) => {
+    this.hub.on('SyncPosition', (lat, lng, heading, pitch, zoom) => {
       if (!this.currentPosition) {
-        this.updatePosition({lat, lng});
+        this.updatePosition({lat, lng, heading, pitch, zoom});
       }});
 
     this.hub.on('SignalToViewer', signal => {
@@ -208,6 +217,10 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   private updatePosition(positionData) {
     this.currentPosition = new google.maps.LatLng(positionData.lat, positionData.lng);
     this.streetView.setPosition(this.currentPosition);
+    if (positionData.heading && positionData.pitch && positionData.zoom) {
+      this.streetView.setPov({heading: positionData.heading, pitch: positionData.pitch});
+      this.streetView.setZoom(positionData.zoom);
+    }
   }
 
   private updateHeading(povData) {
