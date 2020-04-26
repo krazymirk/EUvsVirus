@@ -57,6 +57,7 @@ export class GuideComponent implements OnInit {
   publicLink: string;
   publicLinkVisible = false;
   privateLinksVisible = false;
+  povFocusedForViewers = false;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
@@ -328,6 +329,10 @@ export class GuideComponent implements OnInit {
     this.streetView.addListener('position_changed', () => {
       this.sendPosition();
     });
+
+    this.streetView.addListener('pov_changed', () => {
+      this.povFocusedForViewers = false;
+    });
   }
 
   sendPosition() {
@@ -357,6 +362,7 @@ export class GuideComponent implements OnInit {
     };
 
     this.send(heading);
+    this.povFocusedForViewers = true;
   }
 
   toggleParticipants() {

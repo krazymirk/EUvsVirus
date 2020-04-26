@@ -6,8 +6,8 @@
         <span class="material-icons icon" id="start-stop-audio" (click)="toggleAudio()" title="Turn volume off/on">
             {{abilities.audio ? 'volume_up' : 'volume_off'}}
         </span>
-        <span class="material-icons icon" (click)="sendHeading()" title="Focus viewer's heading">
-            center_focus_weak
+        <span class="material-icons icon" (click)="sendHeading()" title="Focus viewer's look">
+            {{ povFocusedForViewers ? 'center_focus_strong' : 'center_focus_weak'}}
         </span>
     </div>
 </div>
