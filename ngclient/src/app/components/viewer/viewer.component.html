@@ -1,15 +1,19 @@
-
 <div id="floating-panel">
     <div id="icons">
-        <img class="icon" id="start-stop-video" [src]="wantedAbilities?.video ? './../../../assets/icons/camera_off.svg' : './../../../assets/icons/camera_on.svg'"
-            (click)="toggleVideo()"
-        />
-        <img class="icon" id="start-stop-audio" [src]="wantedAbilities?.audio ? './../../../assets/icons/speaker_off.svg' : './../../../assets/icons/speaker_on.svg'"
-            (click)="toggleAudio()"
-        />
+        <img class="icon" id="start-stop-video"
+            [src]="wantedAbilities?.video ? './../../../assets/icons/camera_off.svg' : './../../../assets/icons/camera_on.svg'"
+            (click)="toggleVideo()" />
+        <img class="icon" id="start-stop-audio"
+            [src]="wantedAbilities?.audio ? './../../../assets/icons/speaker_off.svg' : './../../../assets/icons/speaker_on.svg'"
+            (click)="toggleAudio()" />
     </div>
-    <input matInput placeholder="Ex. Pizza" [(ngModel)]="question"/>
-    <button (click)="sendQuestion('da')">ASK</button>
+    <mat-card>
+        <mat-form-field >
+            <mat-label>Ex.Pizza</mat-label>
+            <input matInput [(ngModel)]="question" />
+        </mat-form-field>
+        <button mat-raised-button class="mat-accent mr-16" style="margin-left:1em;" (click)="sendQuestion('da')">ASK</button>
+    </mat-card>
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
     <video #video></video>
