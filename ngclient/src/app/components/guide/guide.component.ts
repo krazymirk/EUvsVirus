@@ -325,7 +325,8 @@ export class GuideComponent implements OnInit {
       }
     };
     if (this.hub.state === HubConnectionState.Connected) {
-      this.hub.invoke('SyncPosition', this.tour.tourHash, position.body.lat, position.body.lng);
+      this.hub.invoke('SyncPosition', this.tour.tourHash, position.body.lat, position.body.lng,
+                this.streetView.getPov().heading, this.streetView.getPov().pitch, this.streetView.getZoom());
     }
 
     this.send(position);
@@ -397,7 +398,6 @@ export class GuideComponent implements OnInit {
     selBox.select();
     document.execCommand('copy');
     document.body.removeChild(selBox);
-debugger;
     const button = document.getElementById(id.currentTarget.id);
     button.innerText = 'Copied!';
     setTimeout(() => {

@@ -99,6 +99,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       });
       position.pipe(take(1)).subscribe(data => {
         this.updatePosition(data);
+        this.currentPosition = undefined;
       });
     });
   }
