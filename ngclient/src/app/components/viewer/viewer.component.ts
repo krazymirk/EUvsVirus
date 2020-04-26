@@ -84,7 +84,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       })
       .catch(err => {
         if (err instanceof HttpErrorResponse && err.status === 403) {
-          alert('Your private link is already in use by someone.');
+          alert('Your private link is already in use by someone.\nIf you haven`t shared the link with anyone, please refresh.');
           window.document.body.innerHTML = '';
         }
       });
