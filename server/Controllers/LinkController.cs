@@ -29,6 +29,7 @@ namespace server.Controllers
                 tour.GuestHash = Guid.NewGuid().Hash();
                 await _tourService.Set(tour);
             }
+            await _tourService.SetHash(tour.GuestHash, tour.TourHash);
 
             return Ok(tour.GuestHash);
         }

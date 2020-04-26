@@ -28,8 +28,12 @@ public class ConnectionHub : Hub
         var idKey = activeIdPrefix + Context.ConnectionId;
         if(_memory.TryGetValue(idKey, out var hash))
         {
-            _memory.Remove(idKey);
-            _memory.Remove(activePrefix + hash);
+            var activeKey = activePrefix + hash;
+            if(_memory.TryGetValue(activeKey, out var connectionId) && (string)connectionId == Context.ConnectionId)
+            {
+                _memory.Remove(idKey);
+                _memory.Remove(activePrefix + hash);
+            }
         }
         await base.OnDisconnectedAsync(exception);
     }
@@ -49,9 +53,14 @@ public class ConnectionHub : Hub
 
     public async Task SendSignalToGuide(string tourHash, string signal)
     {
-        if (_tourService.IsPrivateAndInUse(tourHash))
+        if (_tourService.IsPrivateAndInUse(tourHash, Context.ConnectionId))
         {
             return;
+        }
+        else if (tourHash.StartsWith("_"))
+        {
+            _memory.Set(activeIdPrefix + Context.ConnectionId, tourHash);
+            _memory.Set(activePrefix + tourHash, Context.ConnectionId);
         }
 
         var tour = await this._tourService.Get(tourHash);
@@ -60,14 +69,21 @@ public class ConnectionHub : Hub
 
     public async Task SyncPosition(string tourHash, double lat, double lng)
     {
-        await _cacheService.SetCacheValueAsync("position_" + tourHash, JsonConvert.SerializeObject(new Position(){Lat = lat, Lng = lng}));
+        var tour = await this._tourService.Get(tourHash);
+        await _cacheService.SetCacheValueAsync("position_" + tour.TourHash, JsonConvert.SerializeObject(new Position(){Lat = lat, Lng = lng}));
         await Clients.Group(Context.ConnectionId).SendAsync("SyncPosition", lat, lng);
     }
 
     public async Task JoinTour(string tourHash)
     {
+        if (_tourService.IsPrivateAndInUse(tourHash, Context.ConnectionId))
+        {
+            return;
+        }
+
+        var tour = await this._tourService.Get(tourHash);
         await Groups.AddToGroupAsync(Context.ConnectionId, tourHash);
-        var str =  await _cacheService.GetCacheValueAsync("position_" + tourHash);
+        var str =  await _cacheService.GetCacheValueAsync("position_" + tour.TourHash);
         if(str != null) {
             var p = JsonConvert.DeserializeObject<Position>(str);
             await Clients.Client(Context.ConnectionId).SendAsync("SyncPosition", p.Lat, p.Lng);
@@ -81,6 +97,11 @@ public class ConnectionHub : Hub
 
     public async Task AskQuestion(string tourHash, string question)
     {
+        if (_tourService.IsPrivateAndInUse(tourHash, Context.ConnectionId))
+        {
+            return;
+        }
+
         var tour = await this._tourService.Get(tourHash);
 
         await Clients.Client(tour.GuideId).SendAsync("Question", question, Context.ConnectionId);

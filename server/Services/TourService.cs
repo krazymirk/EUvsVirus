@@ -14,6 +14,7 @@ namespace server.Services
         private const string tourPrefix = "tour_";
         private const string hashPrefix = "hash_";
         private const string activePrefix = "active_";
+        private const string activeIdPrefix = "activeId_";
 
         public TourService(ICacheService cacheService, IMemoryCache memory)
         {
@@ -54,9 +55,22 @@ namespace server.Services
             {
                 return false;
             }
-            var isInUse = _memory.TryGetValue(activePrefix + hash, out var active) && (bool)active;
+
+            return _memory.TryGetValue(activePrefix + hash, out var active);
+        }
+
+        public bool IsPrivateAndInUse(string hash, string connectionId)
+        {
+            var isPrivateAndInUse = IsPrivateAndInUse(hash);
+
+            if (!isPrivateAndInUse)
+            {
+                return false;
+            }
+
+            var connectionIdMem = _memory.Get(activePrefix + hash);
             
-            return isInUse;
+            return (string)connectionIdMem != connectionId;
         }
     }
 }
