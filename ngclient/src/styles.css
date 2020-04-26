@@ -69,7 +69,8 @@ video {
 #pano-info {
     height: min-content;
     position: absolute;
-    top: 10vh;
+    top: 2vh;
+    padding: 5px;
     right: 5vw;
     z-index: 5;
     background-color: #fff;

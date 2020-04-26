@@ -22,12 +22,22 @@
 <div id="pano-info">
     <span>CONNECTED: {{ countConnected }}</span>
     <img class="icon" id="privateLink" src="./../../../assets/icons/people.svg"
-        (click)="getPrivateLinks()"
+        (click)="togglePrivateLinks()"
     />
 
     <img class="icon" id="publicLink" src="./../../../assets/icons/focus2.svg"
-        (click)="getPublicLink()"
+        (click)="togglePublicLink()"
     />
+</div>
+
+<div id="private-link-container" *ngIf="privateLinksVisible">
+    <h4>Private Links:</h4>
+    <p *ngFor="let linker of privateLinks;let i = index;">{{i}}. {{ concatLink(linker) }}</p>
+</div>
+
+<div id="public-link-container" *ngIf="publicLinkVisible">
+    <h4>Public Link:</h4>
+    <p>{{ publicLink }}</p>
 </div>
 <div #streetViewContainer id="pano"></div>
 <div #mapContainer id="map"></div>

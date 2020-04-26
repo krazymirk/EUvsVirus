@@ -53,6 +53,8 @@ export class GuideComponent implements OnInit {
   decoder: TextDecoder;
   privateLinks: string[];
   publicLink: string;
+  publicLinkVisible = false;
+  privateLinksVisible = false;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
@@ -110,19 +112,41 @@ export class GuideComponent implements OnInit {
       count: hardcodedCount
     };
 
-    this.http.post(this.serverUrl + `api/link`, dataToSend).toPromise().then((links: string[]) => {
-      this.privateLinks = links;
-    }).catch((err: HttpErrorResponse) => {
-      console.log('Error getting private links', err);
-    });
+    // this.http.post(this.serverUrl + `api/link`, dataToSend).toPromise().then((links: string[]) => {
+    //   this.privateLinks = links;
+    // }).catch((err: HttpErrorResponse) => {
+    //   console.log('Error getting private links', err);
+    // });
+
+    this.privateLinks = ['asdfadsf', 'dsafdsafdsa', 'asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','asdfadsf', 'dsafdsafdsa','safddsafdsa'];
   }
 
   getPublicLink() {
-    this.http.get(this.serverUrl + `api/link/${this.tourHash}`).toPromise().then((hash: string) => {
-      this.publicLink = location.protocol + '//' + location.host + '/viewer/' + hash;
-    }).catch((err: HttpErrorResponse) => {
-      console.log('Error getting public link', err);
-    });
+    // this.http.get(this.serverUrl + `api/link/${this.tourHash}`).toPromise().then((hash: string) => {
+    //   this.publicLink = this.concatLink(hash);
+    // }).catch((err: HttpErrorResponse) => {
+    //   console.log('Error getting public link', err);
+    // });
+
+    this.publicLink = 'asfddsafadsfdsafasd';
+  }
+
+  concatLink(link: string) {
+    return location.protocol + '//' + location.host + '/viewer/' + link;
+  }
+
+  togglePrivateLinks() {
+    if (!this.privateLinks?.length) {
+      this.getPrivateLinks();
+    }
+    this.privateLinksVisible = !this.privateLinksVisible;
+  }
+
+  togglePublicLink() {
+    if (this.publicLink === '') {
+      this.getPublicLink();
+    }
+    this.publicLinkVisible = !this.publicLinkVisible;
   }
 
   private updateAbilities(fromViewer?: boolean) {

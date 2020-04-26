@@ -1,0 +1,32 @@
+#private-link-container {
+    height: min-content;
+    width: 20vw;
+    max-height: 30vw;
+    position: absolute;
+    top: 15vh;
+    padding: 5px;
+    right: 5vw;
+    z-index: 5;
+    background-color: #fff;
+    border-radius: 20px;
+    text-align: left;
+    color:black;
+    overflow-y: auto;
+}
+
+#public-link-container {
+    height: min-content;
+    width: 20vw;
+    max-height: 30vw;
+    position: absolute;
+    top: 15vh;
+    padding: 5px;
+    right: 5vw;
+    z-index: 5;
+    background-color: #fff;
+    border-radius: 20px;
+    text-align: left;
+    color:black;
+    overflow-y: auto;
+}
+
