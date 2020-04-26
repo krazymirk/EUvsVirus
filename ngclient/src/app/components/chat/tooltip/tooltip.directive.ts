@@ -53,6 +53,8 @@ export class TooltipDirective implements OnInit {
       ]);
 
     this.overlayRef = this.overlay.create({ positionStrategy });
+    this.show();
+    setTimeout(() => {this.hide(); }, 1000);
   }
 
   @HostListener('mouseenter')
