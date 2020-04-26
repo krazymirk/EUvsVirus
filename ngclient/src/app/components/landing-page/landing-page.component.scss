@@ -20,8 +20,6 @@
   top: 5%;
   left: 25%;
 }
-.container {
-  .mat-form-field > * {
-    align-self: center;
-  }
+.container > * {
+  align-self: center;
 }

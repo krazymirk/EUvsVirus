@@ -1,16 +1,15 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { Tour } from 'src/app/models/Tour';
-import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-landing-page',
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.scss']
 })
-export class LandingPageComponent implements AfterViewInit,OnInit {
+export class LandingPageComponent implements AfterViewInit {
   @ViewChild('mapContainer', {static: false}) mapRef: ElementRef;
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
@@ -18,15 +17,10 @@ export class LandingPageComponent implements AfterViewInit,OnInit {
   tourDateTime: Date;
   tourDate: Date = new Date();
   markedLocation: google.maps.LatLng;
-  searchForm: FormGroup;
 
-  constructor(private http: HttpClient, private router: Router,private formBuilder:FormBuilder) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
-  ngOnInit():void{
-    this.searchForm = this.formBuilder.group({
-      search:['']
-    });
-  }
+
   ngAfterViewInit(): void {
     this.map = new google.maps.Map(document.getElementById('mapTour'), {
       center: {lat: -33.8688, lng: 151.2195},
@@ -101,7 +95,7 @@ export class LandingPageComponent implements AfterViewInit,OnInit {
         lat: this.markedLocation.lat(),
         lng: this.markedLocation.lng()
       },
-      name: this.searchForm.get('search').value,
+      name: this.tourName,
       startDateTime: this.tourDate,
     };
 
