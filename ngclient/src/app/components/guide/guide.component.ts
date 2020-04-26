@@ -131,12 +131,18 @@ export class GuideComponent implements OnInit {
     if (!this.privateLinks?.length) {
       this.getPrivateLinks();
     }
+    if(this.publicLinkVisible){
+      this.publicLinkVisible = !this.publicLinkVisible;
+    }
     this.privateLinksVisible = !this.privateLinksVisible;
   }
 
   togglePublicLink() {
     if (!this.publicLink) {
       this.getPublicLink();
+    }
+    if(this.privateLinksVisible){
+      this.privateLinksVisible = !this.privateLinksVisible;
     }
     this.publicLinkVisible = !this.publicLinkVisible;
   }
