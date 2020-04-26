@@ -1,49 +1,60 @@
-<mat-drawer-container class="example-container" autosize>
-    <mat-drawer #drawer class="example-sidenav" mode="side">
-        <div id="map"></div>
-    </mat-drawer>
-
-    <div class="row">
-
+<mat-drawer-container style="background: url('./../../../assets/logos/landing-page.jpg')  no-repeat"
+    class="example-container" autosize>
+    <div id="menu-content">
         <mat-card>
             <div class="row">
                 <mat-card-title>Couch Traveller</mat-card-title>
             </div>
-            <div class="row">
+            <div class="container" fxLayout fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch">
                 <form [formGroup]="searchForm">
-                <mat-form-field appearance="fill" class="pr-20 w-300">
-                    <mat-label>Destination</mat-label>
-                    <input matInput formControlName="search" [value]="search">
-                    <input id="search-box" autocomplete="on" formControlName="search" [value]="search" id="pac-input" type="text">
-                </mat-form-field>
-                <mat-form-field appearance="fill" class="pr-20 w-300">
-                    <mat-label>Date and Time</mat-label>
-                    <input matInput [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1" placeholder="Date Time">
-                    <owl-date-time #dt1></owl-date-time>
-                </mat-form-field>
-            </form>
+                    <div fxFlex="20%">
+                        <img mat-card-md-image id="logo" [src]="'./../../../assets/logos/couch-traveller-logo.svg'" />
+                    </div>
+
+                    <mat-form-field appearance="fill" fxFlex>
+                        <mat-label>Destination</mat-label>
+                        <input id="search-box" formControlName="search" [value]="searchForm.value.search" matInput
+                            id="pac-input" type="text">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" fxFlex>
+                        <mat-label>Tour Name</mat-label>
+                        <input id="search-box" formControlName="search" matInput id="pac-input" type="text">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" fxFlex>
+                        <mat-label>Date and Time</mat-label>
+                        <input matInput [owlDateTime]="dt1" [owlDateTimeTrigger]="dt1" placeholder="Date Time">
+                        <owl-date-time #dt1></owl-date-time>
+                    </mat-form-field>
+
+                    <div fxFlex="20%">
+                        <button mat-raised-button class="mat-accent mr-16" (click)="createTour()">Create Tour</button>
+                    </div>
+                </form>
+
             </div>
         </mat-card>
-
-        <img id="logo" [src]="'./../../../assets/logos/couch-traveller-logo.svg'" />
-
-        <button type="button" mat-button (click)="drawer.toggle()">
-            Toggle sidenav
-        </button>
+        <br />
+        <mat-card>
+            <div id="map" class="example-sidenav"></div>
+        </mat-card>
     </div>
-
 </mat-drawer-container>
+<div hidden id="type-selector" class="pac-controls">
+    <input type="radio" name="type" id="changetype-all" checked="checked">
+    <label for="changetype-all">All</label>
 
+    <input type="radio" name="type" id="changetype-establishment">
+    <label for="changetype-establishment">Establishments</label>
 
+    <input type="radio" name="type" id="changetype-address">
+    <label for="changetype-address">Addresses</label>
 
-
-
-
-<div id="floating_panel">
-    <img id="logo" [src]="'./../../../assets/logos/couch-traveller-logo.svg'" />
-    <input id="search-box" id="pac-input" class="controls" type="text" placeholder="Search Box">
-    <input id="tour-name" [(ngModel)]="tourName" id="tour-name-input" class="controls" type="text"
-        placeholder="Tour Name">
-    <input type="datetime-local">
-    <button type="button" (click)="createTour()">Create tour</button>
+    <input type="radio" name="type" id="changetype-geocode">
+    <label for="changetype-geocode">Geocodes</label>
+</div>
+<div hidden id="strict-bounds-selector" class="pac-controls">
+    <input type="checkbox" id="use-strict-bounds" value="">
+    <label for="use-strict-bounds">Strict Bounds</label>
 </div>
