@@ -11,31 +11,33 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.scss']
 })
-export class LandingPageComponent implements AfterViewInit,OnInit {
-  @ViewChild('mapContainer', {static: false}) mapRef: ElementRef;
+export class LandingPageComponent implements AfterViewInit, OnInit {
+  @ViewChild('mapContainer', { static: false }) mapRef: ElementRef;
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';
   tourDate: Date = new Date();
   markedLocation: google.maps.LatLng;
-  transformDate:string;
-  tourForm:FormGroup;
-  constructor(private http: HttpClient, private router: Router,private formBuilder:FormBuilder) { }
+  transformDate: string;
+  tourForm: FormGroup;
+  adjustedPosition: google.maps.LatLng;
 
-  ngOnInit():void{
-    this.transformDate  = new DatePipe('en-GB').transform(this.tourDate,'yyyy-MM-dd hh:mm:ss', 'GMT+1');
+  constructor(private http: HttpClient, private router: Router, private formBuilder: FormBuilder) { }
+
+  ngOnInit(): void {
+    this.transformDate = new DatePipe('en-GB').transform(this.tourDate, 'yyyy-MM-dd hh:mm:ss', 'GMT+1');
     this.tourDate = new Date(this.transformDate);
 
-this.tourForm = this.formBuilder.group({
-  destination:['',Validators.required],
-  tourName:['',Validators.required],
-  tourDate:[Date,Validators.required]
-});
+    this.tourForm = this.formBuilder.group({
+      destination: ['', Validators.required],
+      tourName: ['', Validators.required],
+      tourDate: [Date, Validators.required]
+    });
 
   }
   ngAfterViewInit(): void {
     this.map = new google.maps.Map(document.getElementById('mapTour'), {
-      center: {lat: -33.8688, lng: 151.2195},
+      center: { lat: -33.8688, lng: 151.2195 },
       zoom: 13,
       mapTypeId: 'roadmap'
     });
@@ -88,6 +90,10 @@ this.tourForm = this.formBuilder.group({
           position: place.geometry.location
         }));
 
+        this.map.getStreetView().addListener('position_changed', () => {
+          this.adjustedPosition = this.map.getStreetView().getPosition();
+       });
+
         this.markedLocation = place.geometry.location;
 
         if (place.geometry.viewport) {
@@ -105,11 +111,16 @@ this.tourForm = this.formBuilder.group({
 
     if (this.tourForm.invalid) {
       return;
-  }
+    }
+
+    if (!this.adjustedPosition) {
+      this.adjustedPosition = this.markedLocation;
+    }
+
     const tourToCreate: Tour = {
       startPosition: {
-        lat: this.markedLocation.lat(),
-        lng: this.markedLocation.lng()
+        lat: this.adjustedPosition.lat(),
+        lng: this.adjustedPosition.lng()
       },
       name: this.tourName,
       startDateTime: this.tourDate,
