@@ -259,7 +259,7 @@ export class GuideComponent implements OnInit {
         this.viewers.push(viewer);
 
         viewer.peer.on('signal', signal => {
-          this.hub.invoke('SendSignalToViewer', viewer.id, JSON.stringify(signal));
+          this.hub.invoke('SendSignalToViewer', viewer.id, this.tourHash, JSON.stringify(signal));
         });
 
         viewer.peer.on('connect', () => {

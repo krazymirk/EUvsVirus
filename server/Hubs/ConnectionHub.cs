@@ -40,15 +40,16 @@ public class ConnectionHub : Hub
 
     public async Task RegisterGuide(string tourHash)
     {
-        var tour = await this._tourService.Get(tourHash);
+        var tour = await this._tourService.GetByGuideHash(tourHash);
         tour.GuideId = Context.ConnectionId;
         await _tourService.Set(tour);
         await Clients.Caller.SendAsync("GuideId", Context.ConnectionId);
         await Clients.Group(tour.TourHash).SendAsync("ActivateTour");
     }
 
-    public async Task SendSignalToViewer(string viewerId, string signal)
+    public async Task SendSignalToViewer(string viewerId, string tourHash, string signal)
     {
+        var tour = await this._tourService.GetByGuideHash(tourHash);
         await Clients.Client(viewerId).SendAsync("SignalToViewer", signal);
     }
 
