@@ -6,7 +6,7 @@ namespace server
 {
     public static class Hashing
     {
-        public static string Hash(this Guid id, byte? shortenTo = 8)
+        public static string Hash(this Guid id, byte? shortenTo = null)
         {
             using (SHA256 sha256Hash = SHA256.Create())  
             {  

@@ -27,7 +27,7 @@
   left: 25%;
 }
 
-.container .mat-form-field > * {
+.container > * {
   -ms-flex-item-align: center;
       align-self: center;
 }

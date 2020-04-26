@@ -1,37 +1,35 @@
-<mat-drawer-container style="background: url('./../../../assets/logos/landing-page.jpg')  no-repeat"
-    class="example-container" autosize>
+<mat-drawer-container class="example-container" autosize>
     <div id="menu-content">
         <mat-card>
             <div class="row">
                 <mat-card-title>Couch Traveller</mat-card-title>
             </div>
-            <div class="container" fxLayout fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch">
+            <div class="container" fxLayout fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="center stretch">
                 <div fxFlex="20%">
                     <img mat-card-md-image id="logo" [src]="'./../../../assets/logos/couch-traveller-logo.svg'" />
                 </div>
-                <mat-form-field appearance="fill" fxFlex>
-                    <form [formGroup]="searchForm">
-                        <mat-label>Destination</mat-label>
-                        <input id="search-box" formControlName="search" [value]="searchForm.value.search" matInput
-                            id="pac-input" type="text">
-                        </form>
-                    </mat-form-field>
+                <form [formGroup]="tourForm">
+                <mat-form-field fxFlex>
+                    <mat-label>Starting Point</mat-label>
+                    <input formControlName='destination' placeholder="Search for location" id="search-box" matInput id="pac-input" type="text">
+                </mat-form-field>
 
-                    <mat-form-field appearance="fill" fxFlex>
-                        <mat-label>Tour Name</mat-label>
-                        <input id="search-box" matInput [(ngModel)]="tourName" id="pac-input2" type="text">
-                    </mat-form-field>
+                <mat-form-field fxFlex>
+                    <mat-label>Tour Name</mat-label>
+                    <input formControlName='tourName' id="search-box" matInput [(ngModel)]="tourName" id="pac-input2" type="text">
+                </mat-form-field>
 
-                    <mat-form-field appearance="fill" fxFlex>
-                        <mat-label>Date and Time</mat-label>
-                        <input matInput [owlDateTime]="dt1" [(ngModel)]="tourDateTime" [owlDateTimeTrigger]="dt1" placeholder="Date Time">
-                        <owl-date-time #dt1></owl-date-time>
-                    </mat-form-field>
+                <mat-form-field fxFlex>
+                    <mat-label>Start Date and Time (CET)</mat-label>
+                    <input formControlName='tourDate' matInput [owlDateTime]="dt1" [(ngModel)]="tourDate" [owlDateTimeTrigger]="dt1"
+                        placeholder="Date Time">
+                    <owl-date-time #dt1></owl-date-time>
+                </mat-form-field>
 
-                    <div fxFlex="20%">
-                        <button mat-raised-button class="mat-accent mr-16" (click)="createTour()">Create Tour</button>
-                    </div>
-
+                <div fxFlex="20%">
+                    <button mat-raised-button class="mat-accent mr-16" (click)="createTour()">Create Tour</button>
+                </div>
+                </form>
             </div>
         </mat-card>
         <br />

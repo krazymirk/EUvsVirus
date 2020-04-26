@@ -107,23 +107,20 @@ export class GuideComponent implements OnInit {
 
   getPrivateLinks() {
     const hardcodedCount = 5;
-    // this.http.post(this.serverUrl + `api/link`, dataToSend).toPromise().then((links: string[]) => {
-    //   this.privateLinks = links;
-    // }).catch((err: HttpErrorResponse) => {
-    //   console.log('Error getting private links', err);
-    // });
-
-    this.privateLinks = ['asdfadsf', 'sf', 'dsafdsafdsa',' safddsafdsa'];
+    this.http.post(this.serverUrl + `api/link/${this.tourHash}/${hardcodedCount}`, {}).toPromise().then((links: string[]) => {
+      this.privateLinks = links;
+    }).catch((err: HttpErrorResponse) => {
+      console.log('Error getting private links', err);
+    });
   }
 
   getPublicLink() {
-    // this.http.get(this.serverUrl + `api/link/${this.tourHash}`).toPromise().then((hash: string) => {
-    //   this.publicLink = this.concatLink(hash);
-    // }).catch((err: HttpErrorResponse) => {
-    //   console.log('Error getting public link', err);
-    // });
-
-    this.publicLink = 'asfddsafadsfdsafasd';
+    this.http.get(this.serverUrl + `api/link/${this.tourHash}`).toPromise().then((hash: string) => {
+      this.publicLink = this.concatLink(hash);
+    }).catch((err: HttpErrorResponse) => {
+      this.publicLink = this.concatLink(err.error.text);
+      console.log('Error getting public link', err);
+    });
   }
 
   concatLink(link: string) {
@@ -138,7 +135,7 @@ export class GuideComponent implements OnInit {
   }
 
   togglePublicLink() {
-    if (this.publicLink === '') {
+    if (!this.publicLink) {
       this.getPublicLink();
     }
     this.publicLinkVisible = !this.publicLinkVisible;
@@ -333,11 +330,6 @@ export class GuideComponent implements OnInit {
     };
 
     this.send(heading);
-  }
-
-  changeVideoButtonText() {
-    const defaultButtonText = 'Start video';
-    const button = document.getElementById('start-video-btn') as HTMLButtonElement;
   }
 
   toggleParticipants() {

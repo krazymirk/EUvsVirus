@@ -1,9 +1,10 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { Tour } from 'src/app/models/Tour';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-landing-page',
@@ -15,17 +16,22 @@ export class LandingPageComponent implements AfterViewInit,OnInit {
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';
-  tourDateTime: Date;
   tourDate: Date = new Date();
   markedLocation: google.maps.LatLng;
-  searchForm: FormGroup;
-
+  transformDate:string;
+  tourForm:FormGroup;
   constructor(private http: HttpClient, private router: Router,private formBuilder:FormBuilder) { }
 
   ngOnInit():void{
-    this.searchForm = this.formBuilder.group({
-      search:['']
-    });
+    this.transformDate  = new DatePipe('en-GB').transform(this.tourDate,'yyyy-MM-dd hh:mm:ss', 'GMT+1');
+    this.tourDate = new Date(this.transformDate);
+
+this.tourForm = this.formBuilder.group({
+  destination:['',Validators.required],
+  tourName:['',Validators.required],
+  tourDate:[Date,Validators.required]
+});
+
   }
   ngAfterViewInit(): void {
     this.map = new google.maps.Map(document.getElementById('mapTour'), {
@@ -96,12 +102,16 @@ export class LandingPageComponent implements AfterViewInit,OnInit {
   }
 
   createTour() {
+
+    if (this.tourForm.invalid) {
+      return;
+  }
     const tourToCreate: Tour = {
       startPosition: {
         lat: this.markedLocation.lat(),
         lng: this.markedLocation.lng()
       },
-      name: this.searchForm.get('search').value,
+      name: this.tourName,
       startDateTime: this.tourDate,
     };
 
