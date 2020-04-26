@@ -1,18 +1,13 @@
 <div id="floating-panel">
     <div id="icons">
-        <img class="icon" id="start-stop-video" [src]="abilities.video ? './../../../assets/icons/camera_off.svg' : './../../../assets/icons/camera_on.svg'"
-            id="start-video-btn"
-            (click)="toggleVideo()"
-        />
-        <img class="icon" id="start-stop-audio" [src]="abilities.audio ? './../../../assets/icons/speaker_off.svg' : './../../../assets/icons/speaker_on.svg'"
-            (click)="toggleAudio()"
-        />
-        <img class="icon" id="participants" src="./../../../assets/icons/people.svg"
-            (click)="toggleParticipants()"
-        />
-        <img class="icon" id="focus" src="./../../../assets/icons/focus2.svg"
-            (click)="sendHeading()"
-        />
+        <img class="icon" id="start-stop-video"
+            [src]="abilities.video ? './../../../assets/icons/camera_off.svg' : './../../../assets/icons/camera_on.svg'"
+            id="start-video-btn" (click)="toggleVideo()" />
+        <img class="icon" id="start-stop-audio"
+            [src]="abilities.audio ? './../../../assets/icons/speaker_off.svg' : './../../../assets/icons/speaker_on.svg'"
+            (click)="toggleAudio()" />
+        <img class="icon" id="participants" src="./../../../assets/icons/people.svg" (click)="toggleParticipants()" />
+        <img class="icon" id="focus" src="./../../../assets/icons/focus2.svg" (click)="sendHeading()" />
     </div>
 </div>
 <app-chat #chat></app-chat>
@@ -22,23 +17,47 @@
 
 <div id="pano-info">
     <span>CONNECTED: {{ countConnected }}</span>
-    <img class="icon" id="privateLink" src="./../../../assets/icons/people.svg"
-        (click)="togglePrivateLinks()"
-    />
+    <img class="icon" id="privateLink" src="./../../../assets/icons/people.svg" (click)="togglePrivateLinks()" />
 
-    <img class="icon" id="publicLink" src="./../../../assets/icons/focus2.svg"
-        (click)="togglePublicLink()"
-    />
+    <img class="icon" id="publicLink" src="./../../../assets/icons/focus2.svg" (click)="togglePublicLink()" />
 </div>
 
 <div id="private-link-container" *ngIf="privateLinksVisible">
-    <h4>Private Links:</h4>
-    <p *ngFor="let linker of privateLinks;let i = index;">{{i}}. {{ concatLink(linker) }}</p>
+    <mat-card>
+        <div class="container" fxLayout="column" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch center">
+            <div fxFill>
+                <mat-label>Private Links:</mat-label>
+            </div>
+            <div *ngFor="let linker of privateLinks;let i = index;" fxFill fxLayout="row" fxLayout.xs="row" fxLayoutAlign="center none">
+                <mat-form-field appearance="fill" style="height: 100%;" fxFlex>
+                    <input #link{{i}} value="{{concatLink(linker)}}" type="text" matInput disabled>
+                </mat-form-field>
+                <div fxFlex>
+                    <button id="button{{i}}" mat-raised-button class="mat-accent mr-16" style="margin-left:1em;height:72%;"
+                        (click)="copyLink(concatLink(linker),$event)">Copy
+                        Link</button>
+                </div>
+            </div>
+        </div>
+    </mat-card>
 </div>
 
 <div id="public-link-container" *ngIf="publicLinkVisible">
-    <h4>Public Link:</h4>
-    <p>{{ publicLink }}</p>
+    <div class="container" fxLayout="column" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch center">
+        <div fxFill>
+            <mat-label>Public Link:</mat-label>
+        </div>
+        <div fxFill>
+            <mat-form-field appearance="fill" style="height: 100%;" fxFlex="50%">
+                <input value="{{publicLink}}" type="text" matInput disabled>
+            </mat-form-field>
+            <div fxFlex="50%">
+                <button id="publicButton" mat-raised-button class="mat-accent mr-16" style="margin-left:1em;height:72%;"
+                    (click)="copyLink(publicLink,$event)">Copy
+                    Link</button>
+            </div>
+        </div>
+    </div>
 </div>
 <div #streetViewContainer id="pano"></div>
 <div #mapContainer id="map"></div>

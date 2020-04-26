@@ -378,4 +378,23 @@ export class GuideComponent implements OnInit {
   get countConnected() {
     return this.viewers.filter(v => v.connected).length;
   }
+  copyLink(link,id){
+    let selBox = document.createElement('textarea');
+    selBox.style.position = 'fixed';
+    selBox.style.left = '0';
+    selBox.style.top = '0';
+    selBox.style.opacity = '0';
+    selBox.value = link;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(selBox);
+debugger;
+    let button = document.getElementById(id.currentTarget.id);
+    button.innerText = 'Copied!'
+    setTimeout(() => {
+      button.innerText = 'Copy Link'
+    }, 3000)
+  }
 }
