@@ -54,8 +54,11 @@ namespace server
                     });
             });
 
+            services.AddMemoryCache();
+
             services.AddSingleton<IConnectionMultiplexer>(x => ConnectionMultiplexer.Connect(Configuration["RedisConnection"]));
             services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddTransient<TourService>();
             services.AddHostedService<RedisSubscriber>();
             services.AddSwaggerGen(c =>
             {

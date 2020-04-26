@@ -107,11 +107,6 @@ export class GuideComponent implements OnInit {
 
   getPrivateLinks() {
     const hardcodedCount = 5;
-    const dataToSend = {
-      hash: this.tourHash,
-      count: hardcodedCount
-    };
-
     // this.http.post(this.serverUrl + `api/link`, dataToSend).toPromise().then((links: string[]) => {
     //   this.privateLinks = links;
     // }).catch((err: HttpErrorResponse) => {
