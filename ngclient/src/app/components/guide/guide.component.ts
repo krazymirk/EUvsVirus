@@ -332,11 +332,6 @@ export class GuideComponent implements OnInit {
     this.send(heading);
   }
 
-  changeVideoButtonText() {
-    const defaultButtonText = 'Start video';
-    const button = document.getElementById('start-video-btn') as HTMLButtonElement;
-  }
-
   toggleParticipants() {
     // show people connected
   }

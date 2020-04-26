@@ -1,18 +1,14 @@
-<div id="floating-panel">
+<div id="actions-panel">
     <div id="icons">
-        <img class="icon" id="start-stop-video" [src]="abilities.video ? './../../../assets/icons/camera_off.svg' : './../../../assets/icons/camera_on.svg'"
-            id="start-video-btn"
-            (click)="toggleVideo()"
-        />
-        <img class="icon" id="start-stop-audio" [src]="abilities.audio ? './../../../assets/icons/speaker_off.svg' : './../../../assets/icons/speaker_on.svg'"
-            (click)="toggleAudio()"
-        />
-        <img class="icon" id="participants" src="./../../../assets/icons/people.svg"
-            (click)="toggleParticipants()"
-        />
-        <img class="icon" id="focus" src="./../../../assets/icons/focus2.svg"
-            (click)="sendHeading()"
-        />
+        <span  class="material-icons icon" id="start-stop-video" (click)="toggleVideo()" title="Turn video off/on">
+            {{abilities.video ? 'videocam' : 'videocam_off'}}
+        </span>
+        <span class="material-icons icon" id="start-stop-audio" (click)="toggleAudio()" title="Turn volume off/on">
+            {{abilities.audio ? 'volume_up' : 'volume_off'}}
+        </span>
+        <span class="material-icons icon" (click)="sendHeading()" title="Focus viewer's heading">
+            center_focus_weak
+        </span>
     </div>
 </div>
 <app-chat #chat></app-chat>
@@ -20,15 +16,16 @@
     <video #video></video>
 </div>
 
-<div id="pano-info">
-    <span>CONNECTED: {{ countConnected }}</span>
-    <img class="icon" id="privateLink" src="./../../../assets/icons/people.svg"
-        (click)="togglePrivateLinks()"
-    />
-
-    <img class="icon" id="publicLink" src="./../../../assets/icons/focus2.svg"
-        (click)="togglePublicLink()"
-    />
+<div id="connectivity-panel">
+    <div id="icons">
+        <span class="icon" style="cursor: default; font-size: 18px;padding-top: 0;">CONNECTED: {{ countConnected }}</span>
+        <span class="material-icons icon" id="publicLink" (click)="togglePublicLink()" title="Get private links">
+            lock
+        </span>
+        <span class="material-icons icon" id="privateLink" (click)="togglePrivateLinks()" title="Get public link">
+            language
+        </span>
+    </div>
 </div>
 
 <div id="private-link-container" *ngIf="privateLinksVisible">
