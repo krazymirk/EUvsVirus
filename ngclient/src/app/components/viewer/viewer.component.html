@@ -1,19 +1,19 @@
 <div id="actions-panel">
     <div id="icons">
-        <img class="icon" id="start-stop-video"
-            [src]="wantedAbilities?.video ? './../../../assets/icons/camera_off.svg' : './../../../assets/icons/camera_on.svg'"
-            (click)="toggleVideo()" />
-        <img class="icon" id="start-stop-audio"
-            [src]="wantedAbilities?.audio ? './../../../assets/icons/speaker_off.svg' : './../../../assets/icons/speaker_on.svg'"
-            (click)="toggleAudio()" />
-    </div>
-    <mat-card>
-        <mat-form-field >
-            <mat-label>Ex.Pizza</mat-label>
+         <span  class="material-icons icon" id="start-stop-video" (click)="toggleVideo()" title="Turn video off/on">
+            {{abilities?.video ? 'videocam' : 'videocam_off'}}
+        </span>
+        <span class="material-icons icon" id="start-stop-audio" (click)="toggleAudio()" title="Turn volume off/on">
+            {{abilities?.audio ? 'volume_up' : 'volume_off'}}
+        </span>
+        <div class="icon">
+            <mat-form-field>
+            <mat-label>Ask a question.</mat-label>
             <input matInput [(ngModel)]="question" />
         </mat-form-field>
         <button mat-raised-button class="mat-accent mr-16" style="margin-left:1em;" (click)="sendQuestion('da')">ASK</button>
-    </mat-card>
+        </div>
+    </div>
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
     <video #video></video>
