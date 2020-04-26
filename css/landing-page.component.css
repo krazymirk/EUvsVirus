@@ -26,4 +26,9 @@
   top: 5%;
   left: 25%;
 }
+
+.container .mat-form-field > * {
+  -ms-flex-item-align: center;
+      align-self: center;
+}
 /*# sourceMappingURL=landing-page.component.css.map */

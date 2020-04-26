@@ -15,9 +15,13 @@
   padding: 20vw;
 }
 
-
-#menu-content{
+#menu-content {
   position: absolute;
   top: 5%;
   left: 25%;
+}
+.container {
+  .mat-form-field > * {
+    align-self: center;
+  }
 }
