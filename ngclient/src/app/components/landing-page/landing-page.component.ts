@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
@@ -11,14 +11,17 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   styleUrls: ['./landing-page.component.scss']
 })
 export class LandingPageComponent implements AfterViewInit,OnInit {
-
+  @ViewChild('mapContainer', {static: false}) mapRef: ElementRef;
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';
+  tourDateTime: Date;
   tourDate: Date = new Date();
   markedLocation: google.maps.LatLng;
-  searchForm:FormGroup;
+  searchForm: FormGroup;
+
   constructor(private http: HttpClient, private router: Router,private formBuilder:FormBuilder) { }
+
   ngOnInit():void{
     this.searchForm = this.formBuilder.group({
       search:['']
@@ -98,7 +101,7 @@ export class LandingPageComponent implements AfterViewInit,OnInit {
         lat: this.markedLocation.lat(),
         lng: this.markedLocation.lng()
       },
-      name: this.tourName,
+      name: this.searchForm.get('search').value,
       startDateTime: this.tourDate,
     };
 
