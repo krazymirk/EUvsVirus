@@ -21,10 +21,17 @@ mat-drawer-container {
 }
 
 #menu-content {
-  position: absolute;
-  top: 5%;
-  left: 25%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .container > * {
   align-self: center;
+}
+
+@media screen and (max-width:900px){
+  #flex-container{
+    flex-direction:column;
+  }
 }
