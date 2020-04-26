@@ -19,12 +19,12 @@
                     <input formControlName='destination' placeholder="Search for location" id="search-box" matInput id="pac-input" type="text">
                 </mat-form-field>
 
-                <mat-form-field fxFlex>
-                    <mat-label>Start Date and Time (CET)</mat-label>
-                    <input formControlName='tourDate' matInput [owlDateTime]="dt1" [(ngModel)]="tourDate" [owlDateTimeTrigger]="dt1"
-                        placeholder="Date Time">
-                    <owl-date-time #dt1></owl-date-time>
-                </mat-form-field>
+                    <mat-form-field fxFlex>
+                        <mat-label>Start Date and Time (CET)</mat-label>
+                        <input formControlName='tourDate' matInput [owlDateTime]="dt1" [(ngModel)]="tourDate"
+                            [owlDateTimeTrigger]="dt1" placeholder="Date Time">
+                        <owl-date-time #dt1></owl-date-time>
+                    </mat-form-field>
 
                 <div fxFlex="20%">
                     <button type="button" mat-raised-button class="mat-accent mr-16" (click)="createTour()">Create Tour</button>

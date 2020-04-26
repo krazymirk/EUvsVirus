@@ -50,7 +50,7 @@ export class GuideComponent implements OnInit {
   isBroadcasting = false;
   abilities: Abilities = {
     video: true,
-    audio: true
+    audio: false
   };
   decoder: TextDecoder;
   privateLinks: string[];
@@ -137,12 +137,18 @@ export class GuideComponent implements OnInit {
     if (!this.privateLinks?.length) {
       this.getPrivateLinks();
     }
+    if(this.publicLinkVisible){
+      this.publicLinkVisible = !this.publicLinkVisible;
+    }
     this.privateLinksVisible = !this.privateLinksVisible;
   }
 
   togglePublicLink() {
     if (!this.publicLink) {
       this.getPublicLink();
+    }
+    if(this.privateLinksVisible){
+      this.privateLinksVisible = !this.privateLinksVisible;
     }
     this.publicLinkVisible = !this.publicLinkVisible;
   }
@@ -378,5 +384,24 @@ export class GuideComponent implements OnInit {
 
   get countConnected() {
     return this.viewers.filter(v => v.connected).length;
+  }
+  copyLink(link, id){
+    const selBox = document.createElement('textarea');
+    selBox.style.position = 'fixed';
+    selBox.style.left = '0';
+    selBox.style.top = '0';
+    selBox.style.opacity = '0';
+    selBox.value = link;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(selBox);
+debugger;
+    const button = document.getElementById(id.currentTarget.id);
+    button.innerText = 'Copied!';
+    setTimeout(() => {
+      button.innerText = 'Copy Link';
+    }, 3000);
   }
 }
