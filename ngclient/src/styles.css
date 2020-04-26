@@ -39,11 +39,36 @@ video {
     cursor: pointer;
 }
 
-#pano-info {
+#floating-panel {
     height: min-content;
     position: absolute;
     top: 2vh;
     padding: 5px;
+    left: 12vw;
+    z-index: 5;
+    background-color: #fff;
+    border-radius: 20px;
+    text-align: center;
+    color:black;
+}
+
+#map {
+    height: 18vw;
+    width: 18vw;
+
+    position: absolute;
+    bottom: 5vh;
+    left: 5vw;
+    z-index: 5;
+    border: 1px solid white;
+    outline: medium;
+}
+
+#pano-info {
+    height: min-content;
+    position: absolute;
+    top: 2vh;
+    padding: 10px;
     right: 5vw;
     z-index: 5;
     background-color: #fff;
