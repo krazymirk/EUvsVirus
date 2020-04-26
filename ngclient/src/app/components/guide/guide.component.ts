@@ -12,6 +12,7 @@ import { take } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Tour } from 'src/app/models/Tour';
 import { ChatComponent } from '../chat/chat.component';
+import { StartingPosition } from 'src/app/models/Position';
 
 interface PeerInfo {
   id: number;
@@ -69,7 +70,7 @@ export class GuideComponent implements OnInit {
       if (tour) {
         this.tour = tour;
         this.initializeMap();
-        this.setStartingPosition();
+        this.setStartingPosition(tour.startPosition);
         this.hub.start().then(this.hubStart.bind(this));
       }
     });
@@ -87,9 +88,14 @@ export class GuideComponent implements OnInit {
     this.decoder = new TextDecoder('utf-8');
   }
 
-  private setStartingPosition() {
-    const position = new google.maps.LatLng(this.tour.startPosition.lat, this.tour.startPosition.lng);
+  private setStartingPosition(startingPosition: StartingPosition) {
+    const position = new google.maps.LatLng(startingPosition.lat, startingPosition.lng);
     this.streetView.setPosition(position);
+
+    if (startingPosition.heading && startingPosition.pitch && startingPosition.zoom) {
+      this.streetView.setPov({heading: startingPosition.heading, pitch: startingPosition.pitch});
+      this.streetView.setZoom(startingPosition.zoom);
+    }
     this.map.setCenter(position);
   }
 

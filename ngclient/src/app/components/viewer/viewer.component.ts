@@ -126,9 +126,9 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   private hubStart() {
 
     this.hub.invoke('JoinTour', this.id);
-    this.hub.on('SyncPosition', (lat, lng) => {
+    this.hub.on('SyncPosition', (lat, lng, heading, pitch, zoom) => {
       if (!this.currentPosition) {
-        this.updatePosition({lat, lng});
+        this.updatePosition({lat, lng, heading, pitch, zoom});
       }});
 
     this.hub.on('SignalToViewer', signal => {
@@ -208,6 +208,10 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   private updatePosition(positionData) {
     this.currentPosition = new google.maps.LatLng(positionData.lat, positionData.lng);
     this.streetView.setPosition(this.currentPosition);
+    if (positionData.heading && positionData.pitch && positionData.zoom) {
+      this.streetView.setPov({heading: positionData.heading, pitch: positionData.pitch});
+      this.streetView.setZoom(positionData.zoom);
+    }
   }
 
   private updateHeading(povData) {
