@@ -8,14 +8,15 @@
         </span>
             <mat-form-field fxFlex>
                 <mat-label>Ask a question.</mat-label>
-                <input matInput [(ngModel)]="question" />
+                <input matInput [(ngModel)]="question" (keyup)="questionKeyUp($event)"/>
             </mat-form-field>
             <button fxFlex mat-raised-button class="mat-accent mr-16" style="margin-left:1em;"
                 (click)="sendQuestion('da')">ASK</button>
     </div>
 </div>
 <div class="sh" *ngIf="this.tour && !this.isConnectionActive">
-    <h1>No guide</h1>
+    <h1>The tour of {{this.tour.name}} hasn't started yet,</h1>
+    <h3>Pleace wait for your guide</h3>
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
     <video #video muted autoplay></video>

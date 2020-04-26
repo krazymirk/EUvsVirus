@@ -126,6 +126,12 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     this.question = '';
   }
 
+  questionKeyUp(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'enter') {
+      this.sendQuestion('ne');
+    }
+  }
+
   private sendAbilitiesToGuide() {
     this.updateAbilitiesProperty();
     const data = {dataType: DataType.ABILITIES, body: this.wantedAbilities};

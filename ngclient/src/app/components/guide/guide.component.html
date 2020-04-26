@@ -6,19 +6,19 @@
         <span class="material-icons icon" id="start-stop-audio" (click)="toggleAudio()" title="Turn volume off/on">
             {{abilities.audio ? 'volume_up' : 'volume_off'}}
         </span>
-        <span class="material-icons icon" (click)="sendHeading()" title="Focus viewer's heading">
-            center_focus_weak
+        <span class="material-icons icon" (click)="sendHeading()" title="Focus viewer's look">
+            {{ povFocusedForViewers ? 'center_focus_strong' : 'center_focus_weak'}}
         </span>
     </div>
 </div>
 <app-chat #chat></app-chat>
 <div id="video-container" [hidden]="!this.abilities.video">
-    <video #video muted autoplay></video>
+    <video style="border: 1px solid white;" #video muted autoplay></video>
 </div>
 
 <div class="connectivity-panel">
     <div id="icons">
-        <span class="icon" style="cursor: default; font-size: 18px;padding-top: 0;">CONNECTED: {{ countConnected }}</span>
+        <span class="icon" style="cursor: default; font-size: 18px;vertical-align: super;">CONNECTED: {{ countConnected }}</span>
         <span class="material-icons icon" id="publicLink" (click)="togglePrivateLinks()" title="Get private links">
             lock
         </span>
@@ -30,15 +30,19 @@
 
 <div id="private-link-container" *ngIf="privateLinksVisible">
     <mat-card>
-        <div class="container" fxLayout="column" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch center">
+        <div class="container" style="text-align: center;" fxLayout="column" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch center">
             <div fxFill>
                 <mat-label>Private Links:</mat-label>
             </div>
+            
+            <p>
+                <b class="margin-right">Get</b>
+                <input class="private-count margin-right" type="number" [(ngModel)]="linkCount" >
+                <button mat-raised-button (click)="getPrivateLinks()" class="mat-accent mr-16" >links.</button>
+            </p>
             <div *ngFor="let linker of privateLinks;let i = index;" fxFill fxLayout="row" fxLayout.xs="row" fxLayoutAlign="center none">
-                <mat-form-field appearance="fill" style="height: 100%;" fxFlex>
-                    <input #link{{i}} value="{{concatLink(linker)}}" type="text" matInput disabled>
-                </mat-form-field>
                 <div fxFlex>
+                    Link number: {{i+1}}
                     <button id="button{{i}}" mat-raised-button class="mat-accent mr-16" style="margin-left:1em;height:72%;"
                         (click)="copyLink(concatLink(linker),$event)">Copy
                         Link</button>
@@ -49,15 +53,12 @@
 </div>
 
 <div id="public-link-container" *ngIf="publicLinkVisible">
-    <div class="container" fxLayout="column" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch center">
+    <div class="container" style="text-align: center;" fxLayout="column" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutAlign="stretch center">
         <div fxFill>
             <mat-label>Public Link:</mat-label>
         </div>
         <div fxFill>
-            <mat-form-field appearance="fill" style="height: 100%;" fxFlex="50%">
-                <input value="{{publicLink}}" type="text" matInput disabled>
-            </mat-form-field>
-            <div fxFlex="50%">
+            <div fxFill fxLayout="row" fxLayout.xs="row" fxLayoutAlign="center none">
                 <button id="publicButton" mat-raised-button class="mat-accent mr-16" style="margin-left:1em;height:72%;"
                     (click)="copyLink(publicLink,$event)">Copy
                     Link</button>

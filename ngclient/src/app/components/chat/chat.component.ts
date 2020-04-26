@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 interface Message {
+
   name: string;
   message: string;
 }
@@ -13,38 +14,16 @@ interface Message {
 
 export class ChatComponent implements OnInit {
 
-  public heads = [
-    {
-      name: 'John Doe',
-      message: 'Hi'
-    },
-    {
-      name: 'Phil James',
-      message: 'Hello'
-    },
-    {
-      name: 'Nikola A',
-      message: 'Hi'
-    },
-    {
-      name: 'D G',
-      message: 'How are you?'
-    },
-    {
-      name: 'John Masters',
-      message: 'Hello'
-    },
-    {
-      name: 'Mark Collins',
-      message: 'Hi'
-    }
-];
+  public heads = [];
   constructor() { }
 
   ngOnInit(): void {
   }
 
   public setmessage(m: Message){
+    const fn = m.name.split(' ').slice(0, -1).join(' ');
+    m.message = `${fn || m.name}: ${m.message}`;
+
     const exst = this.heads.find(h => h.name === m.name);
     if (!exst) {
      this.heads.push(m);
