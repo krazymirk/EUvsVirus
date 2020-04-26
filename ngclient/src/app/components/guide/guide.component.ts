@@ -9,7 +9,7 @@ import { Observable, Subscriber, Subscription } from 'rxjs';
 import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
 import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Tour } from 'src/app/models/Tour';
 
 interface PeerInfo {
@@ -51,15 +51,17 @@ export class GuideComponent implements OnInit {
     audio: false
   };
   decoder: TextDecoder;
+  privateLinks: string[];
+  publicLink: string;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
   ngOnInit(): void {
-
     this.route.params.pipe(take(1)).subscribe((params) => {
       this.tourHash = params.id;
     });
 
+    // get tour
     this.http.get(environment.serverUrl + `api/tour/${this.tourHash}`).toPromise().then((tour: Tour) => {
       if (tour) {
         this.tour = tour;
@@ -99,6 +101,28 @@ export class GuideComponent implements OnInit {
     this.abilities.audio = !this.abilities.audio;
 
     this.updateAbilities();
+  }
+
+  getPrivateLinks() {
+    const hardcodedCount = 5;
+    const dataToSend = {
+      hash: this.tourHash,
+      count: hardcodedCount
+    };
+
+    this.http.post(this.serverUrl + `api/link`, dataToSend).toPromise().then((links: string[]) => {
+      this.privateLinks = links;
+    }).catch((err: HttpErrorResponse) => {
+      console.log('Error getting private links', err);
+    });
+  }
+
+  getPublicLink() {
+    this.http.get(this.serverUrl + `api/link/${this.tourHash}`).toPromise().then((hash: string) => {
+      this.publicLink = location.protocol + '//' + location.host + '/viewer/' + hash;
+    }).catch((err: HttpErrorResponse) => {
+      console.log('Error getting public link', err);
+    });
   }
 
   private updateAbilities(fromViewer?: boolean) {
