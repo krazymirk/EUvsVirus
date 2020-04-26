@@ -32,18 +32,20 @@ video {
 }
 
 .icon {
-    max-width: 1.8em;
-    min-width: 1.8em;
+    max-width: 2em;
+    min-width: 2em;
     padding-left: 10px;
     padding-right: 10px;
+    padding-top: 5px;
     cursor: pointer;
 }
 
-#floating-panel {
+#actions-panel {
     height: min-content;
     position: absolute;
+    padding-top: 5px;
     top: 2vh;
-    padding: 5px;
+    padding: 3px;
     left: 12vw;
     z-index: 5;
     background-color: #fff;
@@ -64,11 +66,11 @@ video {
     outline: medium;
 }
 
-#pano-info {
+.connectivity-panel {
     height: min-content;
     position: absolute;
     top: 2vh;
-    padding: 10px;
+    padding: 3px;
     right: 5vw;
     z-index: 5;
     background-color: #fff;

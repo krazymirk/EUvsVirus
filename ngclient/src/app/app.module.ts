@@ -15,6 +15,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { AvatarModule } from 'ngx-avatar';
 import { TooltipComponent } from './components/chat/tooltip/tooltip.component';
 import { TooltipDirective } from './components/chat/tooltip/tooltip.directive';
+import { HithereComponent } from './components/hithere/hithere.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { TooltipDirective } from './components/chat/tooltip/tooltip.directive';
     LandingPageComponent,
     ChatComponent,
     TooltipComponent,
-    TooltipDirective
+    TooltipDirective,
+    HithereComponent
   ],
   imports: [
     BrowserModule,
@@ -40,6 +42,7 @@ import { TooltipDirective } from './components/chat/tooltip/tooltip.directive';
     AvatarModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [HithereComponent]
 })
 export class AppModule { }

@@ -44,6 +44,7 @@ public class ConnectionHub : Hub
         tour.GuideId = Context.ConnectionId;
         await _tourService.Set(tour);
         await Clients.Caller.SendAsync("GuideId", Context.ConnectionId);
+        await Clients.Group(tour.TourHash).SendAsync("ActivateTour");
     }
 
     public async Task SendSignalToViewer(string viewerId, string signal)
@@ -69,9 +70,9 @@ public class ConnectionHub : Hub
 
     public async Task SyncPosition(string tourHash, double lat, double lng)
     {
-        var tour = await this._tourService.Get(tourHash);
+        var tour = await this._tourService.GetByGuideHash(tourHash);
         await _cacheService.SetCacheValueAsync("position_" + tour.TourHash, JsonConvert.SerializeObject(new Position(){Lat = lat, Lng = lng}));
-        await Clients.Group(Context.ConnectionId).SendAsync("SyncPosition", lat, lng);
+        await Clients.Group(tour.TourHash).SendAsync("SyncPosition", lat, lng);
     }
 
     public async Task JoinTour(string tourHash)
@@ -82,7 +83,7 @@ public class ConnectionHub : Hub
         }
 
         var tour = await this._tourService.Get(tourHash);
-        await Groups.AddToGroupAsync(Context.ConnectionId, tourHash);
+        await Groups.AddToGroupAsync(Context.ConnectionId, tour.TourHash);
         var str =  await _cacheService.GetCacheValueAsync("position_" + tour.TourHash);
         if(str != null) {
             var p = JsonConvert.DeserializeObject<Position>(str);
