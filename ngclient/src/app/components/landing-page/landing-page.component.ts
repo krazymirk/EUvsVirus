@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
@@ -14,6 +14,7 @@ export class LandingPageComponent implements AfterViewInit {
 
   searchForm: FormGroup;
   searchField: FormControl;
+  @ViewChild('mapTour', {static: false}) mapRef: ElementRef;
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';

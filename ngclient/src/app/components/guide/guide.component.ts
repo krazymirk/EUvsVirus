@@ -9,7 +9,7 @@ import { Observable, Subscriber, Subscription } from 'rxjs';
 import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
 import { ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Tour } from 'src/app/models/Tour';
 
 interface PeerInfo {
@@ -28,7 +28,8 @@ interface PeerInfo {
   styleUrls: ['./guide.component.scss']
 })
 export class GuideComponent implements OnInit {
-  @ViewChild('mapContainer', {static: false}) pano: ElementRef;
+  @ViewChild('streetViewContainer', {static: false}) panoRef: ElementRef;
+  @ViewChild('mapContainer', {static: false}) mapRef: ElementRef;
   @ViewChild('video', {static: false}) videoDom: ElementRef;
 
   serverUrl = environment.serverUrl;
@@ -36,8 +37,8 @@ export class GuideComponent implements OnInit {
   tour: Tour;
 
   streetView: google.maps.StreetViewPanorama;
+  map: google.maps.Map;
   guideId: string;
-  panoInfo: PositionInfo;
 
   viewers: PeerInfo[] = [];
   hub: HubConnection;
@@ -50,15 +51,17 @@ export class GuideComponent implements OnInit {
     audio: false
   };
   decoder: TextDecoder;
+  privateLinks: string[];
+  publicLink: string;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
   ngOnInit(): void {
-
     this.route.params.pipe(take(1)).subscribe((params) => {
       this.tourHash = params.id;
     });
 
+    // get tour
     this.http.get(environment.serverUrl + `api/tour/${this.tourHash}`).toPromise().then((tour: Tour) => {
       if (tour) {
         this.tour = tour;
@@ -85,6 +88,7 @@ export class GuideComponent implements OnInit {
   private setStartingPosition() {
     const position = new google.maps.LatLng(this.tour.startPosition.lat, this.tour.startPosition.lng);
     this.streetView.setPosition(position);
+    this.map.setCenter(position);
   }
 
   toggleVideo() {
@@ -97,6 +101,28 @@ export class GuideComponent implements OnInit {
     this.abilities.audio = !this.abilities.audio;
 
     this.updateAbilities();
+  }
+
+  getPrivateLinks() {
+    const hardcodedCount = 5;
+    const dataToSend = {
+      hash: this.tourHash,
+      count: hardcodedCount
+    };
+
+    this.http.post(this.serverUrl + `api/link`, dataToSend).toPromise().then((links: string[]) => {
+      this.privateLinks = links;
+    }).catch((err: HttpErrorResponse) => {
+      console.log('Error getting private links', err);
+    });
+  }
+
+  getPublicLink() {
+    this.http.get(this.serverUrl + `api/link/${this.tourHash}`).toPromise().then((hash: string) => {
+      this.publicLink = location.protocol + '//' + location.host + '/viewer/' + hash;
+    }).catch((err: HttpErrorResponse) => {
+      console.log('Error getting public link', err);
+    });
   }
 
   private updateAbilities(fromViewer?: boolean) {
@@ -232,25 +258,30 @@ export class GuideComponent implements OnInit {
   }
 
   initializeMap(): void {
+
     const coordinates = new google.maps.LatLng(42.646859, 23.396585);
+
+    this.map = new google.maps.Map(this.mapRef.nativeElement, {
+      center: coordinates,
+      zoom: 14
+    });
+
     const mapOptions = {
-      position: coordinates,     // {lat: 42.646859, lng: 23.396585} - Capital Fort
+      position: coordinates,
       pov: {
         heading: 270,
         pitch: 0
       },
       visible: true,
-      streetViewControl: false,
-      source: google.maps.StreetViewSource.OUTDOOR
+      streetViewControl: true,
+      source: google.maps.StreetViewSource.DEFAULT,
+      draggable: true,
+      linksControl: true
     };
 
-    this.streetView = new google.maps.StreetViewPanorama(this.pano.nativeElement, mapOptions);
-    this.panoInfo = {
-      lat: coordinates.lat(),
-      lng: coordinates.lng(),
-      heading: mapOptions.pov.heading,
-      pitch: mapOptions.pov.pitch
-    };
+    this.streetView = new google.maps.StreetViewPanorama(this.panoRef.nativeElement, mapOptions);
+    this.map.setStreetView(this.streetView);
+
 
     this.streetView.addListener('position_changed', () => {
       this.sendPosition();

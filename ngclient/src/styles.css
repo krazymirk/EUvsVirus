@@ -13,12 +13,13 @@ video {
 #video-container {
     width: 18vw;
     position: absolute;
-    top: 15vh;
-    left: 12vw;
+    top: 12vh;
+    left: 5vw;
     z-index: 5;
     border: 1px solid white;
     outline: medium;
 }
+
 #pano {
     float: left;
     height: 100%;
@@ -41,19 +42,13 @@ video {
 #pano-info {
     height: min-content;
     position: absolute;
-    top: 5px;
-    right: 5%;
+    top: 10vh;
+    right: 5vw;
     z-index: 5;
     background-color: #fff;
-    padding: 2px;
-    border: 1px solid #999;
     border-radius: 20px;
     text-align: center;
     color:black;
-    text-shadow: yellow;
-    font-family: 'Roboto','sans-serif';
-    line-height: 30px;
-    padding-left: 5px;
 }
 
 html, body { height: 100%; }
