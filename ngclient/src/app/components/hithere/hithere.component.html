@@ -4,11 +4,11 @@
 
   <mat-form-field>
     <mat-label>Nickname:</mat-label>
-    <input matInput [(ngModel)]="nickname">
+    <input matInput [(ngModel)]="nickname" (keyup)="nicknameKeyUp($event)">
   </mat-form-field>
 
   <h4>The tour should start on {{ startTime | date:'medium' }} CET.</h4>
 </div>
 <div mat-dialog-actions>
-  <button mat-raised-button color="primary" (click)="close()">Tour!</button>
+  <button mat-raised-button color="primary" (click)="close()" cdkFocusInitial>Tour!</button>
 </div>

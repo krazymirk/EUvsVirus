@@ -56,8 +56,15 @@ export class HithereComponent implements OnInit {
       });
   }
 
+  nicknameKeyUp(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'enter') {
+      this.close();
+    }
+  }
 
   close() {
-    this.dialogRef.close({nickname: this.nickname, tour: this.tour});
+    if (this.tour) {
+      this.dialogRef.close({nickname: this.nickname, tour: this.tour});
+    }
   }
 }

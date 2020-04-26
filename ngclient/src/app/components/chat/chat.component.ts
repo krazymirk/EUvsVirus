@@ -14,24 +14,7 @@ interface Message {
 
 export class ChatComponent implements OnInit {
 
-  public heads = [
-    {
-      name: 'John Doe',
-      message: 'John: Hi'
-    },
-    {
-      name: 'Phil James',
-      message: 'Phil: Hello'
-    },
-    {
-      name: 'Nikola A',
-      message: 'Nikola: Hi'
-    },
-    {
-      name: 'Mark Collins',
-      message: 'Mark: How are you?'
-    }
-];
+  public heads = [];
   constructor() { }
 
   ngOnInit(): void {
@@ -39,9 +22,8 @@ export class ChatComponent implements OnInit {
 
   public setmessage(m: Message){
     const fn = m.name.split(' ').slice(0, -1).join(' ');
-    if (fn) {
-      m.message = `${fn}: ${m.message}`;
-    }
+    m.message = `${fn || m.name}: ${m.message}`;
+
     const exst = this.heads.find(h => h.name === m.name);
     if (!exst) {
      this.heads.push(m);
