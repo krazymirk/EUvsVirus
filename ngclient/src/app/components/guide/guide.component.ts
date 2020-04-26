@@ -79,9 +79,7 @@ export class GuideComponent implements OnInit {
       .withUrl(this.serverUrl + 'connect')
       .build();
 
-    this.getAudioVideoStreams().then(([a, v]) => {
-      this.audioStream = a;
-      this.videoStream = v;
+    this.ensureStreams().then(() => {
       this.changeVideoDomStream();
     });
 
@@ -102,13 +100,29 @@ export class GuideComponent implements OnInit {
   toggleVideo() {
     this.abilities.video = !this.abilities.video;
 
-    this.updateAbilities();
+    this.toggledMedia();
   }
 
   toggleAudio() {
     this.abilities.audio = !this.abilities.audio;
 
-    this.updateAbilities();
+    this.toggledMedia();
+  }
+
+  toggledMedia() {
+    if (this.audioStream && !this.abilities.audio) {
+      this.destroyAudioStream();
+    }
+    if (this.videoStream && !this.abilities.video) {
+      this.destroyVideoStream();
+    }
+
+    this.ensureStreams().then(() => {
+      if (this.videoStream) {
+        this.changeVideoDomStream();
+      }
+      this.updateAbilities();
+    });
   }
 
   getPrivateLinks() {
@@ -137,7 +151,7 @@ export class GuideComponent implements OnInit {
     if (!this.privateLinks?.length) {
       this.getPrivateLinks();
     }
-    if(this.publicLinkVisible){
+    if (this.publicLinkVisible){
       this.publicLinkVisible = !this.publicLinkVisible;
     }
     this.privateLinksVisible = !this.privateLinksVisible;
@@ -147,7 +161,7 @@ export class GuideComponent implements OnInit {
     if (!this.publicLink) {
       this.getPublicLink();
     }
-    if(this.privateLinksVisible){
+    if (this.privateLinksVisible){
       this.privateLinksVisible = !this.privateLinksVisible;
     }
     this.publicLinkVisible = !this.publicLinkVisible;
@@ -349,13 +363,20 @@ export class GuideComponent implements OnInit {
     // show people connected
   }
 
-  getAudioVideoStreams() {
-    this.destroyStreams();
+  ensureStreams() {
+    const promises: Promise<void>[] = [];
+    if (!this.audioStream && this.abilities.audio) {
+      promises.push(navigator.mediaDevices.getUserMedia({audio: true}).then((stream) => {
+        this.audioStream = stream;
+      }));
+    }
+    if (!this.videoStream && this.abilities.video) {
+      promises.push(navigator.mediaDevices.getUserMedia({video: true}).then((stream) => {
+        this.videoStream = stream;
+      }));
+    }
 
-    const audioPromise = navigator.mediaDevices.getUserMedia({audio: true});
-    const videoPromise = navigator.mediaDevices.getUserMedia({video: true});
-
-    return Promise.all([audioPromise, videoPromise]);
+    return Promise.all(promises);
   }
 
   private destroyStreams() {
