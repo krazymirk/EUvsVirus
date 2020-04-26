@@ -34,6 +34,13 @@
             <div fxFill>
                 <mat-label>Private Links:</mat-label>
             </div>
+            
+            <p>
+                <b class="margin-right">Get</b>
+                <input class="private-count margin-right" type="number" [(ngModel)]="linkCount" >
+                <button mat-raised-button (click)="getPrivateLinks()" class="mat-accent mr-16" >links.</button>
+            </p>
+
             <div *ngFor="let linker of privateLinks;let i = index;" fxFill fxLayout="row" fxLayout.xs="row" fxLayoutAlign="center none">
                 <mat-form-field appearance="fill" style="height: 100%;" fxFlex>
                     <input #link{{i}} value="{{concatLink(linker)}}" type="text" matInput disabled>

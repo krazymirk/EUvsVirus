@@ -26,7 +26,11 @@ export interface HithereData {
 export class HithereComponent implements OnInit {
 
   public nickname = '';
-  private tour: Tour;
+  public tour: Tour;
+
+  public tourName = '';
+
+  public startTime: Date;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private config: HithereConfig,
@@ -39,6 +43,8 @@ export class HithereComponent implements OnInit {
       .then((tour: Tour) => {
         if (tour) {
           this.tour = tour;
+          this.tourName = tour.name;
+          this.startTime = tour.startDateTime;
           this.config.position.next(tour.startPosition);
         }
       })

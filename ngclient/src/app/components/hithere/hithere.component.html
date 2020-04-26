@@ -1,11 +1,14 @@
-<h1 mat-dialog-title>Hi there!</h1>
+<h1 mat-dialog-title>{{tourName}}</h1>
 <div mat-dialog-content>
+  <h4>Hi there!</h4>
+
   <mat-form-field>
     <mat-label>Nickname:</mat-label>
     <input matInput [(ngModel)]="nickname">
   </mat-form-field>
+
+  <h4>The tour should start on {{ startTime | date:'medium' }} CET.</h4>
 </div>
 <div mat-dialog-actions>
-  <!-- <button mat-button (click)="close()">Close</button> -->
-  <button mat-button (click)="close()">Tour</button>
+  <button mat-raised-button color="primary" (click)="close()">Tour!</button>
 </div>

@@ -50,7 +50,7 @@ export class GuideComponent implements OnInit {
   isBroadcasting = false;
   abilities: Abilities = {
     video: true,
-    audio: false
+    audio: true
   };
   decoder: TextDecoder;
   privateLinks: string[];
@@ -58,6 +58,8 @@ export class GuideComponent implements OnInit {
   publicLinkVisible = false;
   privateLinksVisible = false;
   povFocusedForViewers = false;
+
+  linkCount: number = 5;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) { }
 
@@ -127,9 +129,12 @@ export class GuideComponent implements OnInit {
   }
 
   getPrivateLinks() {
-    const hardcodedCount = 5;
-    this.http.post(this.serverUrl + `api/link/${this.tourHash}/${hardcodedCount}`, {}).toPromise().then((links: string[]) => {
+    if (!this.linkCount) {
+      return;
+    }
+    this.http.post(this.serverUrl + `api/link/${this.tourHash}/${this.linkCount}`, {}).toPromise().then((links: string[]) => {
       this.privateLinks = links;
+      this.linkCount = 5;
     }).catch((err: HttpErrorResponse) => {
       console.log('Error getting private links', err);
     });
@@ -149,9 +154,6 @@ export class GuideComponent implements OnInit {
   }
 
   togglePrivateLinks() {
-    if (!this.privateLinks?.length) {
-      this.getPrivateLinks();
-    }
     if (this.publicLinkVisible){
       this.publicLinkVisible = !this.publicLinkVisible;
     }
@@ -265,7 +267,9 @@ export class GuideComponent implements OnInit {
 
         viewer.peer.on('connect', () => {
           viewer.connected = true;
-          this.updateAbilities();
+          this.ensureStreams().then(() => {
+            this.updateAbilities();
+          });
         });
 
         viewer.peer.on('data', data => this.onData(data, viewer));
@@ -281,9 +285,7 @@ export class GuideComponent implements OnInit {
     });
 
     this.hub.on('GuideId', id => {
-      const a = document.querySelector('a');
       this.guideId = id;
-      a.innerHTML = location.protocol + '//' + location.host + '/viewer/' + this.tour.tourHash;
     });
 
     this.hub.on('Question', this.onQuestion.bind(this));
