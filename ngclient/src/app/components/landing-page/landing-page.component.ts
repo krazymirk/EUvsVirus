@@ -1,26 +1,31 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { Tour } from 'src/app/models/Tour';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-landing-page',
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.scss']
 })
-export class LandingPageComponent implements AfterViewInit {
-  @ViewChild('mapTour', {static: false}) mapRef: ElementRef;
+export class LandingPageComponent implements AfterViewInit,OnInit {
+
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';
   tourDate: Date = new Date();
   markedLocation: google.maps.LatLng;
-
-  constructor(private http: HttpClient, private router: Router) { }
-
+  searchForm:FormGroup;
+  constructor(private http: HttpClient, private router: Router,private formBuilder:FormBuilder) { }
+  ngOnInit():void{
+    this.searchForm = this.formBuilder.group({
+      search:['']
+    });
+  }
   ngAfterViewInit(): void {
-    this.map = new google.maps.Map(this.mapRef.nativeElement, {
+    this.map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: -33.8688, lng: 151.2195},
       zoom: 13,
       mapTypeId: 'roadmap'
@@ -29,7 +34,6 @@ export class LandingPageComponent implements AfterViewInit {
     // Create the search box and link it to the UI element.
     const input = document.getElementById('pac-input') as any;
     const searchBox = new google.maps.places.SearchBox(input);
-    this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
     // Bias the SearchBox results towards current map's viewport.
     this.map.addListener('bounds_changed', () => {
