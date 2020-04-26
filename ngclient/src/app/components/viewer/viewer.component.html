@@ -1,21 +1,20 @@
 <div id="actions-panel">
-    <div id="icons">
-         <span  class="material-icons icon" id="start-stop-video" (click)="toggleVideo()" title="Turn video off/on">
+    <div id="icons" fxLayout="row" fxLayout.xs="row" fxLayoutGap="10px" fxLayoutAlign="stretch center">
+        <span fxFlex class="material-icons icon" id="start-stop-video" (click)="toggleVideo()" title="Turn video off/on">
             {{abilities?.video ? 'videocam' : 'videocam_off'}}
         </span>
-        <span class="material-icons icon" id="start-stop-audio" (click)="toggleAudio()" title="Turn volume off/on">
+        <span fxFlex class="material-icons icon" id="start-stop-audio" (click)="toggleAudio()" title="Turn volume off/on">
             {{abilities?.audio ? 'volume_up' : 'volume_off'}}
         </span>
-        <div class="icon">
-            <mat-form-field>
-            <mat-label>Ask a question.</mat-label>
-            <input matInput [(ngModel)]="question" />
-        </mat-form-field>
-        <button mat-raised-button class="mat-accent mr-16" style="margin-left:1em;" (click)="sendQuestion('da')">ASK</button>
-        </div>
+            <mat-form-field fxFlex>
+                <mat-label>Ask a question.</mat-label>
+                <input matInput [(ngModel)]="question" />
+            </mat-form-field>
+            <button fxFlex mat-raised-button class="mat-accent mr-16" style="margin-left:1em;"
+                (click)="sendQuestion('da')">ASK</button>
     </div>
 </div>
-<div class="sh" *ngIf="this.tour && !this.isConnectionActive" >  
+<div class="sh" *ngIf="this.tour && !this.isConnectionActive">
     <h1>No guide</h1>
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
