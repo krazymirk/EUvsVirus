@@ -10,13 +10,13 @@
                 </div>
                 <form [formGroup]="tourForm">
                 <mat-form-field fxFlex>
-                    <mat-label>Starting Point</mat-label>
-                    <input formControlName='destination' placeholder="Search for location" id="search-box" matInput id="pac-input" type="text">
+                    <mat-label>Tour Name</mat-label>
+                    <input formControlName='tourName' id="search-box" matInput [(ngModel)]="tourName" id="pac-input2" type="text">
                 </mat-form-field>
 
                 <mat-form-field fxFlex>
-                    <mat-label>Tour Name</mat-label>
-                    <input formControlName='tourName' id="search-box" matInput [(ngModel)]="tourName" id="pac-input2" type="text">
+                    <mat-label>Start Destination</mat-label>
+                    <input formControlName='destination' placeholder="Search for location" id="search-box" matInput id="pac-input" type="text">
                 </mat-form-field>
 
                 <mat-form-field fxFlex>
@@ -27,7 +27,7 @@
                 </mat-form-field>
 
                 <div fxFlex="20%">
-                    <button mat-raised-button class="mat-accent mr-16" (click)="createTour()">Create Tour</button>
+                    <button type="button" mat-raised-button class="mat-accent mr-16" (click)="createTour()">Create Tour</button>
                 </div>
                 </form>
             </div>
