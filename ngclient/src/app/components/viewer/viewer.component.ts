@@ -9,6 +9,8 @@ import { destroyStream, changeDomStream } from 'src/app/audioVideoHelpers';
 import { Abilities } from 'src/app/models/Abilities';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Tour } from 'src/app/models/Tour';
+import { MatDialogConfig, MatDialog } from '@angular/material/dialog';
+import { HithereComponent, HithereConfig, HithereData } from '../hithere/hithere.component';
 
 @Component({
   selector: 'app-viewer',
@@ -45,10 +47,10 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   abilities: Abilities;
   question: string;
   tour: Tour;
-
+  nickname: string;
   public isConnectionActive = false;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {
+  constructor(private route: ActivatedRoute, private http: HttpClient, private dialog: MatDialog) {
   }
 
   ngAfterViewInit(): void {
@@ -70,26 +72,27 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.hub = new HubConnectionBuilder()
+    .withUrl(this.serverUrl + 'connect')
+    .build();
+
     this.route.params.pipe(take(1)).subscribe((params) => {
       this.id = params.id;
-    });
 
-    this.http.get(environment.serverUrl + `api/tour/${this.id}`).toPromise()
-      .then((tour: Tour) => {
-        if (tour) {
-          this.tour = tour;
-          this.hub = new HubConnectionBuilder()
-            .withUrl(this.serverUrl + 'connect')
-            .build();
-          this.hub.start().then(this.hubStart.bind(this));
-        }
-      })
-      .catch(err => {
-        if (err instanceof HttpErrorResponse && err.status === 403) {
-          alert('Your private link is already in use by someone.\nIf you haven`t shared the link with anyone, please refresh.');
-          window.document.body.innerHTML = '';
-        }
+      this.dialog.open(HithereComponent, {
+        disableClose: true,
+        autoFocus: true,
+        width: '50vw',
+        data: {
+          hub: this.hub,
+          tourHash: this.id
+        } as HithereConfig
+      }).afterClosed().toPromise().then((data: HithereData) => {
+        this.tour = data.tour;
+        this.nickname = data.nickname;
+        this.hub.start().then(this.hubStart.bind(this));
       });
+    });
   }
 
   changePosition() {

@@ -15,12 +15,12 @@
         </div>
     </div>
 </div>
-<div class="sh" *ngIf="!this.isConnectionActive" >  
+<div class="sh" *ngIf="this.tour && !this.isConnectionActive" >  
     <h1>No guide</h1>
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
-    <video #video></video>
+    <video #video muted autoplay></video>
 </div>
-<audio #audio></audio>
+<audio #audio autoplay></audio>
 
 <div #mapContainer id="pano"></div>

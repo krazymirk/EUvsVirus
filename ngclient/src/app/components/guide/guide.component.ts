@@ -49,7 +49,7 @@ export class GuideComponent implements OnInit {
   isBroadcasting = false;
   abilities: Abilities = {
     video: true,
-    audio: false
+    audio: true
   };
   decoder: TextDecoder;
   privateLinks: string[];
