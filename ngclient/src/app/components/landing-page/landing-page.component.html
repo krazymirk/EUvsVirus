@@ -21,7 +21,7 @@
 
                     <mat-form-field fxFlex>
                         <mat-label>Start Date and Time (CET)</mat-label>
-                        <input formControlName='tourDate' matInput [owlDateTime]="dt1" [(ngModel)]="tourDate"
+                        <input formControlName='tourDate'  matInput [owlDateTime]="dt1" [(ngModel)]="tourDate"
                             [owlDateTimeTrigger]="dt1" placeholder="Date Time">
                         <owl-date-time #dt1></owl-date-time>
                     </mat-form-field>

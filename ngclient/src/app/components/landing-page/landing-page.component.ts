@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { Tour } from 'src/app/models/Tour';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -25,9 +25,8 @@ export class LandingPageComponent implements AfterViewInit, OnInit {
   constructor(private http: HttpClient, private router: Router, private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
-    this.transformDate = new DatePipe('en-GB').transform(this.tourDate, 'yyyy-MM-dd hh:mm:ss', 'GMT+1');
-    this.tourDate = new Date(this.transformDate);
-
+    var formattedDate = formatDate(this.tourDate.toISOString(),'yyyy-MM-dd HH:mm:ss','en-GB','+1');
+    this.tourDate = new Date(formattedDate);
     this.tourForm = this.formBuilder.group({
       destination: ['', Validators.required],
       tourName: ['', Validators.required],

@@ -16,6 +16,7 @@ import { AvatarModule } from 'ngx-avatar';
 import { TooltipComponent } from './components/chat/tooltip/tooltip.component';
 import { TooltipDirective } from './components/chat/tooltip/tooltip.directive';
 import { HithereComponent } from './components/hithere/hithere.component';
+import { OWL_DATE_TIME_LOCALE } from 'ng-pick-datetime';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,7 @@ import { HithereComponent } from './components/hithere/hithere.component';
     FlexLayoutModule,
     AvatarModule
   ],
-  providers: [],
+  providers: [{provide:OWL_DATE_TIME_LOCALE,useValue:'en-GB'}],
   bootstrap: [AppComponent],
   entryComponents: [HithereComponent]
 })
