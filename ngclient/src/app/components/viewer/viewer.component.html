@@ -10,6 +10,7 @@
     </div>
     <input matInput placeholder="Ex. Pizza" [(ngModel)]="question"/>
     <button (click)="sendQuestion('da')">ASK</button>
+    {{this.isConnectionActive}}
 </div>
 <div id="video-container" [hidden]="!(abilities?.video)">
     <video #video></video>

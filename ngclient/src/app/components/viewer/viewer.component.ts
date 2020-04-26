@@ -46,6 +46,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   question: string;
   tour: Tour;
 
+  public isConnectionActive = false;
+
   constructor(private route: ActivatedRoute, private http: HttpClient) {
   }
 
@@ -119,11 +121,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   private hubStart() {
-    this.guidePeer = new SimplePeer( { initiator: true });
 
-    this.guidePeer.on('signal', signal => {
-      this.hub.invoke('SendSignalToGuide', this.id, JSON.stringify(signal));
-    });
     this.hub.invoke('JoinTour', this.id);
     this.hub.on('SyncPosition', (lat, lng) => {
       if (!this.currentPosition) {
@@ -134,16 +132,50 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       this.guidePeer.signal(JSON.parse(signal));
     });
 
+
+    this.hub.on('ActivateTour', () => {
+      console.log('АЙДЕ');
+      this.createPeer();
+    });
+    this.createPeer();
+  }
+
+  private destroyStreams() {
+    this.destroyAudioStream();
+    this.destroyVideoStream();
+  }
+
+  private createPeer() {
+    if (this.guidePeer) {
+      this.guidePeer.destroy();
+    }
+    this.guidePeer = new SimplePeer( { initiator: true });
+
+    this.guidePeer.on('signal', signal => {
+      this.hub.invoke('SendSignalToGuide', this.id, JSON.stringify(signal));
+    });
+    this.guidePeer.on('connect', (x) => {
+      console.log('connect', x);
+      this.isConnectionActive = true;
+    });
+
     this.guidePeer.on('stream', (stream: MediaStream) => {
       if (stream.getVideoTracks().length) {
+        this.destroyVideoStream();
         this.videoStream = stream;
         this.changeVideoDomStream();
       } else if (stream.getAudioTracks().length) {
+        this.destroyAudioStream();
         this.audioStream = stream;
         this.changeAudioDomStream();
       }
     });
 
+    this.guidePeer.on('close', (x) => {
+      console.log('close', x);
+      this.currentPosition = undefined;
+      this.isConnectionActive = false;
+    });
     this.guidePeer.on('data', data => {
       const parsed = this.parseData(data);
       if (parsed.dataType === DataType.HEADING) {
@@ -155,12 +187,9 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       }
     });
 
-    this.guidePeer.on('error', console.error);
-  }
-
-  private destroyStreams() {
-    this.destroyAudioStream();
-    this.destroyVideoStream();
+    this.guidePeer.on('error', (e) => {
+      console.error(e);
+    });
   }
 
   private destroyAudioStream() {
