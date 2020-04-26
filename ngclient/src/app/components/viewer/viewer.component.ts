@@ -113,7 +113,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   sendQuestion(question: string) {
-    this.hub.send('AskQuestion', this.id, this.question);
+    this.hub.send('AskQuestion', this.id, this.question, this.nickname);
     this.question = '';
   }
 

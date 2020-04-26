@@ -96,8 +96,8 @@ public class ConnectionHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, guideId);
     }
 
-    public async Task AskQuestion(string tourHash, string question)
-    {
+    public async Task AskQuestion(string tourHash, string question, string nickname)
+    {   
         if (_tourService.IsPrivateAndInUse(tourHash, Context.ConnectionId))
         {
             return;
@@ -105,7 +105,7 @@ public class ConnectionHub : Hub
 
         var tour = await this._tourService.Get(tourHash);
 
-        await Clients.Client(tour.GuideId).SendAsync("Question", question, Context.ConnectionId);
+        await Clients.Client(tour.GuideId).SendAsync("Question", question, nickname);
     }
 
 }

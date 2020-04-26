@@ -48,6 +48,6 @@ export class HithereComponent implements OnInit {
 
 
   close() {
-    this.dialogRef.close({nickname:this.nickname});
+    this.dialogRef.close({nickname: this.nickname, tour: this.tour});
   }
 }

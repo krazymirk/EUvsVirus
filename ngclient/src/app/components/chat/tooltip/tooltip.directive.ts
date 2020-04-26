@@ -10,13 +10,15 @@ import { Observable } from 'rxjs';
 
 @Directive({ selector: '[appTooltip]' })
 export class TooltipDirective implements OnInit {
+  shown: boolean = false;
+  
   @Input('appTooltip')
   set content(c: string | TemplateRef<any>) {
     this._content = c;
     if (this.overlayRef) {
       if (c) {
         this.show();
-        setTimeout(() => {this.hide(); }, 1000);
+        this.hide();
       }
     }
   }
@@ -59,6 +61,7 @@ export class TooltipDirective implements OnInit {
 
   @HostListener('mouseenter')
   show() {
+    this.shown = true;
     const tooltipPortal = new ComponentPortal(TooltipComponent);
 
     const tooltipRef: ComponentRef<TooltipComponent> = this.overlayRef.attach(
@@ -74,6 +77,11 @@ export class TooltipDirective implements OnInit {
 
   @HostListener('mouseout')
   hide() {
-   this.overlayRef.detach();
+    this.shown = false;
+    setTimeout(() => {
+      if (!this.shown) {
+        this.overlayRef.detach();
+      }
+    }, 1000);
   }
 }

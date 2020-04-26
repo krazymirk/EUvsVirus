@@ -16,27 +16,27 @@ export class ChatComponent implements OnInit {
   public heads = [
     {
       name: 'John Doe',
-      message: 'false'
+      message: 'Hi'
     },
     {
-      name: 'Bohn Boe',
-      message: 'false'
+      name: 'Phil James',
+      message: 'Hello'
     },
     {
       name: 'Nikola A',
-      message: 'false'
+      message: 'Hi'
     },
     {
       name: 'D G',
-      message: 'false'
+      message: 'How are you?'
     },
     {
-      name: 'John Doe',
-      message: 'false'
+      name: 'John Masters',
+      message: 'Hello'
     },
     {
-      name: 'Bohn Boe',
-      message: 'false'
+      name: 'Mark Collins',
+      message: 'Hi'
     }
 ];
   constructor() { }
