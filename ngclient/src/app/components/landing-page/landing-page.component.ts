@@ -1,26 +1,38 @@
-import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { Tour } from 'src/app/models/Tour';
+import { DatePipe } from '@angular/common';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-landing-page',
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.scss']
 })
-export class LandingPageComponent implements AfterViewInit {
+export class LandingPageComponent implements AfterViewInit,OnInit {
   @ViewChild('mapContainer', {static: false}) mapRef: ElementRef;
   serverUrl = environment.serverUrl;
   map: google.maps.Map;
   tourName = '';
-  tourDateTime: Date;
   tourDate: Date = new Date();
   markedLocation: google.maps.LatLng;
+  transformDate:string;
+  tourForm:FormGroup;
+  constructor(private http: HttpClient, private router: Router,private formBuilder:FormBuilder) { }
 
-  constructor(private http: HttpClient, private router: Router) { }
+  ngOnInit():void{
+    this.transformDate  = new DatePipe('en-GB').transform(this.tourDate,'yyyy-MM-dd hh:mm:ss', 'GMT+1');
+    this.tourDate = new Date(this.transformDate);
 
+this.tourForm = this.formBuilder.group({
+  destination:['',Validators.required],
+  tourName:['',Validators.required],
+  tourDate:[Date,Validators.required]
+});
 
+  }
   ngAfterViewInit(): void {
     this.map = new google.maps.Map(document.getElementById('mapTour'), {
       center: {lat: -33.8688, lng: 151.2195},
@@ -90,6 +102,10 @@ export class LandingPageComponent implements AfterViewInit {
   }
 
   createTour() {
+
+    if (this.tourForm.invalid) {
+      return;
+  }
     const tourToCreate: Tour = {
       startPosition: {
         lat: this.markedLocation.lat(),
